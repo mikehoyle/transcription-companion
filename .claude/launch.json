@@ -12,6 +12,12 @@
       "runtimeExecutable": "npm",
       "runtimeArgs": ["run", "preview", "--", "--port", "4173", "--strictPort"],
       "port": 4173
+    },
+    {
+      "name": "pages",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["--yes", "wrangler", "pages", "dev", "dist", "--port", "8788", "--ip", "127.0.0.1"],
+      "port": 8788
     }
   ]
 }

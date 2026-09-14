@@ -1,0 +1,6 @@
+# Cloudflare Pages project configuration.
+# `name` must match the Pages project name. The build command (`npm run build`)
+# is configured in the Pages dashboard; see "Deploying to Cloudflare Pages" in README.md.
+name = "transcription-companion"
+pages_build_output_dir = "./dist"
+compatibility_date = "2026-09-13"

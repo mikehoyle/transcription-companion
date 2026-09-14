@@ -1,7 +1,8 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
-// Mirrors the Content-Security-Policy served by nginx in production so that
+// Mirrors the Content-Security-Policy served in production — keep in sync with
+// nginx.conf (Docker) and public/_headers (Cloudflare Pages) — so that
 // `npm run preview` exercises the same restrictions.
 // - blob: in script-src is required because signalsmith-stretch loads its
 //   AudioWorklet module from a Blob URL.

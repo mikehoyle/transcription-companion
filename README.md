@@ -39,7 +39,35 @@ npm run build      # type-check + static build into dist/
 npm run preview    # serve dist/ with the production Content-Security-Policy
 ```
 
-`npm run dev`/`build` automatically copy the ffmpeg.wasm core from `node_modules` into `public/ffmpeg/`.
+`npm run dev`/`build` automatically copy the ffmpeg.wasm core from `node_modules` into `public/ffmpeg/<version>/`,
+splitting the ~32 MB wasm binary into 10 MiB parts (static hosts cap file size; the browser reassembles them on first
+use). `npm run build` finishes by checking every output file against Cloudflare Pages' limits.
+
+## Deploying to Cloudflare Pages
+
+The repo is ready for Cloudflare Pages' Git integration:
+
+- `wrangler.toml` — Pages project config (`name`, `pages_build_output_dir = "./dist"`). With this file present, those
+  fields are read-only in the dashboard.
+- `public/_headers` — Content-Security-Policy, security headers and long-lived caching for hashed/versioned assets
+  (copied into `dist/` by the build).
+- `.nvmrc` — pins Node 22 for the Pages build image.
+
+One-time setup in the Cloudflare dashboard:
+
+1. **Workers & Pages → Create → Pages → Import an existing Git repository**, authorise GitHub and select this repository.
+2. **Project name:** `transcription-companion` (must match `name` in `wrangler.toml`; if you choose another name, change
+   the file to match).
+3. **Production branch:** `main`.
+4. **Framework preset:** None. **Build command:** `npm run build`. **Build output directory:** `dist`. **Root directory:** blank.
+5. **Save and Deploy.** Every push to `main` deploys to production; pushes to other branches get preview URLs.
+
+To test the production output locally with Cloudflare's own server (applies `_headers` exactly as Pages does):
+
+```bash
+npm run build
+npx wrangler pages dev dist
+```
 
 ## Docker
 

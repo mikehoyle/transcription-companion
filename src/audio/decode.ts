@@ -46,14 +46,17 @@ async function convertWithFFmpeg(name: string, data: Uint8Array, onProgress: Pro
   onProgress('This format needs the extended decoder — loading ffmpeg.wasm (first time only)…', null);
   const { FFmpeg } = await import('@ffmpeg/ffmpeg');
   const ffmpeg: FFmpeg = new FFmpeg();
-  const base = new URL('ffmpeg/', document.baseURI);
+  let wasmURL: string | null = null;
   try {
-    await ffmpeg.load({
-      coreURL: new URL('ffmpeg-core.js', base).href,
-      wasmURL: new URL('ffmpeg-core.wasm', base).href,
-    });
+    const core = await fetchFFmpegCore(onProgress);
+    wasmURL = core.wasmURL;
+    onProgress('Starting extended decoder…', null);
+    await ffmpeg.load(core);
   } catch (e) {
     throw new Error(`Could not load the extended decoder (${e instanceof Error ? e.message : e}).`);
+  } finally {
+    // the worker has already read the wasm by the time load() settles
+    if (wasmURL) URL.revokeObjectURL(wasmURL);
   }
 
   const logs: string[] = [];
@@ -80,6 +83,50 @@ async function convertWithFFmpeg(name: string, data: Uint8Array, onProgress: Pro
   } finally {
     ffmpeg.terminate();
   }
+}
+
+/** Written by scripts/copy-ffmpeg.mjs. Paths are relative to /ffmpeg/. */
+interface FFmpegManifest {
+  version: string;
+  core: string;
+  wasmParts: string[];
+  wasmSize: number;
+}
+
+/**
+ * The ffmpeg wasm binary is served in parts (static hosts such as Cloudflare
+ * Pages cap individual files at 25 MiB); download them in parallel and
+ * reassemble into a blob: URL for ffmpeg.load().
+ */
+async function fetchFFmpegCore(onProgress: Progress): Promise<{ coreURL: string; wasmURL: string }> {
+  const base = new URL('ffmpeg/', document.baseURI);
+  const res = await fetch(new URL('manifest.json', base), { cache: 'no-cache' });
+  if (!res.ok) throw new Error(`manifest.json: HTTP ${res.status}`);
+  const manifest = (await res.json()) as FFmpegManifest;
+
+  let received = 0;
+  onProgress('Downloading extended decoder (first time only)…', 0);
+  const parts = await Promise.all(
+    manifest.wasmParts.map(async (path) => {
+      const r = await fetch(new URL(path, base));
+      if (!r.ok || !r.body) throw new Error(`${path}: HTTP ${r.status}`);
+      const reader = r.body.getReader();
+      const chunks: BlobPart[] = [];
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        chunks.push(value);
+        received += value.byteLength;
+        onProgress('Downloading extended decoder (first time only)…', Math.min(1, received / manifest.wasmSize));
+      }
+      return new Blob(chunks);
+    }),
+  );
+  const wasm = new Blob(parts, { type: 'application/wasm' });
+  if (wasm.size !== manifest.wasmSize) {
+    throw new Error(`decoder download was incomplete (${wasm.size} of ${manifest.wasmSize} bytes)`);
+  }
+  return { coreURL: new URL(manifest.core, base).href, wasmURL: URL.createObjectURL(wasm) };
 }
 
 /** Mono mixdown resampled to `rate` Hz, used for analysis. */
