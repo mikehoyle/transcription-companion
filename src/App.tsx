@@ -96,6 +96,16 @@ function Header() {
             />
           </>
         )}
+        <a
+          className="icon-btn"
+          href="https://github.com/mikehoyle/transcription-companion/issues/new/choose"
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Report an issue"
+          aria-label="Report an issue"
+        >
+          <Icon name="bug" size={20} />
+        </a>
         <button className="icon-btn" onClick={() => store.set({ helpOpen: true })} title="Help & shortcuts (?)">
           <Icon name="help" size={20} />
         </button>
@@ -129,10 +139,13 @@ function Welcome() {
         <li><h2>Markers</h2><span>Tap markers while listening, loop between markers.</span></li>
         <li><h2>Export & sessions</h2><span>Render processed WAVs; save your markers and loops to a file.</span></li>
       </ul>
-      <p className="privacy">
-        🔒 100% local: files are processed in your browser and never uploaded. Your last file (up to{' '}
-        {RECENT_FILE_MAX_BYTES / 1024 / 1024} MB) and per-song settings are kept in this browser so you can pick up where you left off.
-      </p>
+      <div className="disclaimers">
+        <p>
+          🔒 100% local: files are processed in your browser and never uploaded. Your last file (up to{' '}
+          {RECENT_FILE_MAX_BYTES / 1024 / 1024} MB) and per-song settings are kept in this browser so you can pick up where you left off.
+        </p>
+        <p>100% free: No subscriptions, no premium-only features</p>
+      </div>
     </main>
   );
 }
