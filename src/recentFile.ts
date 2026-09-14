@@ -43,9 +43,9 @@ export async function saveRecentFile(file: File) {
   try {
     if (file.size > RECENT_FILE_MAX_BYTES) return await forgetRecentFile();
     const record: StoredFile = { name: file.name, type: file.type, lastModified: file.lastModified, blob: file };
+    // Deliberately not calling navigator.storage.persist(): Firefox shows a permission prompt for it,
+    // and losing this convenience copy under storage pressure just means the file isn't reopened.
     await withStore('readwrite', (s) => s.put(record, RECENT));
-    // Ask the browser not to evict it under storage pressure; harmless if refused.
-    void navigator.storage?.persist?.().catch(() => {});
   } catch (e) {
     console.warn('Could not remember file for next visit', e);
   }
