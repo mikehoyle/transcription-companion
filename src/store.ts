@@ -107,7 +107,7 @@ export interface AppState {
   view: { start: number; end: number };
   follow: boolean;
   showRoll: boolean;
-  showNotes: boolean; // user preference, shared across all files
+  showNotes: boolean; // follow, showRoll & showNotes are user preferences, shared across all files
 
   analysis: {
     status: 'idle' | 'running' | 'done' | 'error';
@@ -141,14 +141,14 @@ export const DEFAULT_EQ: EqState = {
 // Settings that apply to every file, persisted in localStorage separately from per-file sessions.
 
 const PREFS_KEY = 'learn-by-ear:prefs';
-const PREF_KEYS = ['showNotes'] as const satisfies readonly (keyof AppState)[];
+const PREF_KEYS = ['follow', 'showRoll', 'showNotes'] as const satisfies readonly (keyof AppState)[];
 type Prefs = Pick<AppState, (typeof PREF_KEYS)[number]>;
 
 function loadPrefs(): Prefs {
-  const prefs: Prefs = { showNotes: true };
+  const prefs: Prefs = { follow: true, showRoll: false, showNotes: true };
   try {
     const data = JSON.parse(localStorage.getItem(PREFS_KEY) ?? '{}');
-    if (typeof data?.showNotes === 'boolean') prefs.showNotes = data.showNotes;
+    for (const k of PREF_KEYS) if (typeof data?.[k] === 'boolean') prefs[k] = data[k];
   } catch {}
   return prefs;
 }
@@ -180,8 +180,6 @@ export const initialState = (): AppState => ({
   snapToGrid: false,
   metronome: { on: false, volume: 0.6 },
   view: { start: 0, end: 1 },
-  follow: true,
-  showRoll: false,
   ...loadPrefs(),
   analysis: { status: 'idle', progress: 0, key: null, chords: [], roll: null },
   transposeDisplay: 0,
