@@ -208,7 +208,7 @@ export function NotesPanel() {
           <div ref={notesRef} className="note-list" />
         </div>
         <div className="readout-block">
-          <span className="readout-label">Song key</span>
+          <span className="readout-label">Estimated song key</span>
           <div className="key-name">{keyName}</div>
         </div>
       </div>

@@ -18,6 +18,7 @@ const PATHS: Record<string, string> = {
   close: 'M6.4 5L12 10.6 17.6 5 19 6.4 13.4 12l5.6 5.6-1.4 1.4L12 13.4 6.4 19 5 17.6 10.6 12 5 6.4z',
   trash: 'M9 3h6l1 2h4v2H4V5h4zm-3 6h12l-1 12H7z',
   roll: 'M3 5h18v2H3zm0 4h12v2H3zm0 4h16v2H3zm0 4h9v2H3z',
+  notes: 'M9 3h11v13.5a3 3 0 11-2-2.83V7h-7v11.5a3 3 0 11-2-2.83z',
 };
 
 export function Icon({ name, size = 18 }: { name: keyof typeof PATHS | string; size?: number }) {

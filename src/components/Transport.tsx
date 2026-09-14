@@ -12,6 +12,7 @@ export function Transport() {
   const loop = useStore((s) => s.loop);
   const follow = useStore((s) => s.follow);
   const showRoll = useStore((s) => s.showRoll);
+  const showNotes = useStore((s) => s.showNotes);
   const gridVisible = useStore((s) => s.gridVisible);
   const rate = useStore((s) => s.rate);
   const semitones = useStore((s) => s.semitones);
@@ -93,6 +94,9 @@ export function Transport() {
         </button>
         <button className={`icon-btn ${showRoll ? 'on' : ''}`} title="Show pitch roll" onClick={() => store.set({ showRoll: !showRoll })}>
           <Icon name="roll" />
+        </button>
+        <button className={`icon-btn ${showNotes ? 'on' : ''}`} title="Show notes & chords" onClick={() => store.set({ showNotes: !showNotes })}>
+          <Icon name="notes" />
         </button>
         <button className={`icon-btn ${follow ? 'on' : ''}`} title="Follow playhead (F)" onClick={() => store.set({ follow: !follow })}>
           <Icon name="follow" />

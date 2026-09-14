@@ -107,6 +107,7 @@ export interface AppState {
   view: { start: number; end: number };
   follow: boolean;
   showRoll: boolean;
+  showNotes: boolean; // user preference, shared across all files
 
   analysis: {
     status: 'idle' | 'running' | 'done' | 'error';
@@ -135,6 +136,22 @@ export const DEFAULT_EQ: EqState = {
     { freq: 10000, gain: 0, q: 0.9 },
   ],
 };
+
+// ------------------------------------------------------------ user preferences
+// Settings that apply to every file, persisted in localStorage separately from per-file sessions.
+
+const PREFS_KEY = 'learn-by-ear:prefs';
+const PREF_KEYS = ['showNotes'] as const satisfies readonly (keyof AppState)[];
+type Prefs = Pick<AppState, (typeof PREF_KEYS)[number]>;
+
+function loadPrefs(): Prefs {
+  const prefs: Prefs = { showNotes: true };
+  try {
+    const data = JSON.parse(localStorage.getItem(PREFS_KEY) ?? '{}');
+    if (typeof data?.showNotes === 'boolean') prefs.showNotes = data.showNotes;
+  } catch {}
+  return prefs;
+}
 
 export const initialState = (): AppState => ({
   file: null,
@@ -165,6 +182,7 @@ export const initialState = (): AppState => ({
   view: { start: 0, end: 1 },
   follow: true,
   showRoll: false,
+  ...loadPrefs(),
   analysis: { status: 'idle', progress: 0, key: null, chords: [], roll: null },
   transposeDisplay: 0,
   helpOpen: false,
@@ -192,6 +210,17 @@ class Store {
 }
 
 export const store = new Store();
+
+store.subscribe((s, p) => {
+  if (!PREF_KEYS.some((k) => s[k] !== p[k])) return;
+  const prefs: Record<string, unknown> = {};
+  for (const k of PREF_KEYS) prefs[k] = s[k];
+  try {
+    localStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
+  } catch (e) {
+    console.warn('Could not save preferences', e);
+  }
+});
 
 export function useStore<T>(selector: (s: AppState) => T): T {
   return useSyncExternalStore(

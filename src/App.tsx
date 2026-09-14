@@ -188,6 +188,7 @@ function Overlays() {
 export default function App() {
   const hasFile = useStore((s) => s.file !== null);
   const hasVideo = useStore((s) => !!s.file?.videoUrl);
+  const showNotes = useStore((s) => s.showNotes);
   const [dragging, setDragging] = useState(false);
 
   useEffect(() => {
@@ -249,7 +250,7 @@ export default function App() {
             <LoopPanel />
             <TempoPanel />
             <MarkersPanel />
-            <NotesPanel />
+            {showNotes && <NotesPanel />}
             <SoundPanel />
           </div>
         </main>

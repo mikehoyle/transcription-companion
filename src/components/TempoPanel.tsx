@@ -1,5 +1,4 @@
 import * as c from '../controller';
-import { pcName } from '../audio/music';
 import { store, useStore } from '../store';
 import { NumberField, Panel, Segmented, Slider, Toggle } from './controls';
 
@@ -10,14 +9,12 @@ export function TempoPanel() {
   const metronome = useStore((s) => s.metronome);
   const countIn = useStore((s) => s.countIn);
   const analysis = useStore((s) => s.analysis.status);
-  const key = useStore((s) => s.analysis.key);
-  const shift = useStore((s) => Math.round(s.semitones + s.cents / 100) + s.transposeDisplay);
 
   const setTempo = (patch: Partial<typeof tempo>) => store.set((s) => ({ tempo: { ...s.tempo, ...patch } }));
   const setCountIn = (patch: Partial<typeof countIn>) => store.set((s) => ({ countIn: { ...s.countIn, ...patch } }));
 
   return (
-    <Panel title="Tempo, metronome & key">
+    <Panel title="Tempo & metronome">
       <div className="tempo-top">
         <div className="bpm-box">
           <NumberField value={tempo.bpm} min={20} max={400} step={0.5} onChange={c.setBpm} width="4.5em" format={(v) => v.toFixed(1)} />
@@ -75,13 +72,6 @@ export function TempoPanel() {
         <div className="field-row wrap">
           <Toggle checked={countIn.onPlay} onChange={(v) => setCountIn({ onPlay: v })}>Before playing</Toggle>
           <Toggle checked={countIn.onLoop} onChange={(v) => setCountIn({ onLoop: v })}>Before each loop repeat</Toggle>
-        </div>
-      </div>
-
-      <div className="subsection">
-        <div className="subsection-head">
-          <h3>Estimated key</h3>
-          <span className="key-name">{key ? `${pcName(key.tonic + shift)} ${key.mode}` : analysis === 'running' ? '…' : '—'}</span>
         </div>
       </div>
     </Panel>
