@@ -107,7 +107,7 @@ function Header() {
 function Welcome() {
   const input = useRef<HTMLInputElement>(null);
   return (
-    <div className="welcome">
+    <main className="welcome">
       <div className="drop-card" onClick={() => input.current?.click()} role="button" tabIndex={0}>
         <div className="drop-icon">
           <Icon name="open" size={40} />
@@ -120,20 +120,20 @@ function Welcome() {
         <input ref={input} type="file" accept={ACCEPT} hidden onChange={(e) => handleFiles(e.target.files)} />
       </div>
       <ul className="feature-grid">
-        <li><b>Slow down without pitch change</b><span>5%–400% speed with high-quality time stretching.</span></li>
-        <li><b>Transpose & fine-tune</b><span>±24 semitones, cents, formant preservation.</span></li>
-        <li><b>A–B loops & speed trainer</b><span>Seamless loops, pauses, count-ins, step-up speed practice.</span></li>
-        <li><b>Note & chord guessing</b><span>Pitch spectrum on a keyboard, chord names, pitch roll & chord timeline.</span></li>
-        <li><b>Tempo, beats & key</b><span>Auto-detected BPM & key, tap tempo, beat grid, metronome.</span></li>
-        <li><b>Isolate parts</b><span>Parametric EQ, karaoke vocal cancel, L/R/mono channels.</span></li>
-        <li><b>Markers</b><span>Tap markers while listening, loop between markers.</span></li>
-        <li><b>Export & sessions</b><span>Render processed WAVs; save your markers and loops to a file.</span></li>
+        <li><h2>Slow down without pitch change</h2><span>5%–400% speed with high-quality time stretching.</span></li>
+        <li><h2>Transpose & fine-tune</h2><span>±24 semitones, cents, formant preservation.</span></li>
+        <li><h2>A–B loops & speed trainer</h2><span>Seamless loops, pauses, count-ins, step-up speed practice.</span></li>
+        <li><h2>Note & chord guessing</h2><span>Pitch spectrum on a keyboard, chord names, pitch roll & chord timeline.</span></li>
+        <li><h2>Tempo, beats & key</h2><span>Auto-detected BPM & key, tap tempo, beat grid, metronome.</span></li>
+        <li><h2>Isolate parts</h2><span>Parametric EQ, karaoke vocal cancel, L/R/mono channels.</span></li>
+        <li><h2>Markers</h2><span>Tap markers while listening, loop between markers.</span></li>
+        <li><h2>Export & sessions</h2><span>Render processed WAVs; save your markers and loops to a file.</span></li>
       </ul>
       <p className="privacy">
         🔒 100% local: files are processed in your browser and never uploaded. Your last file (up to{' '}
         {RECENT_FILE_MAX_BYTES / 1024 / 1024} MB) and per-song settings are kept in this browser so you can pick up where you left off.
       </p>
-    </div>
+    </main>
   );
 }
 

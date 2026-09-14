@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+# Lazily loaded ffmpeg.wasm binaries; nothing to index.
+Disallow: /ffmpeg/
+
+Sitemap: https://learnbyear.com/sitemap.xml

@@ -1,5 +1,5 @@
 import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
+import { createRoot, hydrateRoot } from 'react-dom/client';
 import App from './App';
 import { engine } from './audio/engine';
 import * as controller from './controller';
@@ -11,8 +11,13 @@ if (import.meta.env.DEV) {
   (window as unknown as Record<string, unknown>).__tc = { engine, store, controller };
 }
 
-createRoot(document.getElementById('root')!).render(
+const root = document.getElementById('root')!;
+const app = (
   <StrictMode>
     <App />
-  </StrictMode>,
+  </StrictMode>
 );
+
+// Production builds ship the welcome screen pre-rendered (see vite.config.ts), so hydrate it.
+if (root.hasChildNodes()) hydrateRoot(root, app);
+else createRoot(root).render(app);

@@ -93,6 +93,7 @@ src/
     fft.ts, wav.ts, export.ts
   components/          React UI (timeline canvases, transport, panels)
   controller.ts        user actions, file loading, sessions, export
+  prerender.tsx        build-time render of the welcome screen into index.html (for SEO / link previews)
   store.ts             tiny external store used with useSyncExternalStore
   shortcuts.ts         keyboard shortcuts
 ```

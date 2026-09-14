@@ -131,6 +131,7 @@ select {
   display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px;
 }
 .feature-grid li { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; display: flex; flex-direction: column; gap: 4px; }
+.feature-grid h2 { margin: 0; font-size: inherit; }
 .feature-grid span { color: var(--muted); font-size: 13px; }
 .privacy { color: var(--muted); font-size: 13px; }
 

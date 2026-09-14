@@ -221,10 +221,9 @@ store.subscribe((s, p) => {
 });
 
 export function useStore<T>(selector: (s: AppState) => T): T {
-  return useSyncExternalStore(
-    (cb) => store.subscribe(cb),
-    () => selector(store.get()),
-  );
+  const snapshot = () => selector(store.get());
+  // Same snapshot on the server: the build-time prerender sees the initial (no file) state.
+  return useSyncExternalStore((cb) => store.subscribe(cb), snapshot, snapshot);
 }
 
 let idCounter = 0;
