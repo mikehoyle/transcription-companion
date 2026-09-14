@@ -263,9 +263,13 @@ input[type='range'] { width: 100%; accent-color: var(--accent); min-width: 60px;
 /* sound panel */
 .eq-canvas { width: 100%; height: 150px; display: block; background: var(--bg); border-radius: 6px; touch-action: none; }
 .eq-bands { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 6px 14px; }
-.eq-band { display: flex; flex-direction: column; gap: 2px; padding: 6px 8px; background: var(--surface-2); border-radius: 8px; position: relative; }
+.eq-band { display: flex; flex-direction: column; gap: 2px; padding: 6px 8px 6px 26px; background: var(--surface-2); border-radius: 8px; position: relative; }
 .eq-band .slider { min-width: 0; grid-template-columns: 34px 1fr 64px; }
-.band-num { position: absolute; top: 4px; right: 8px; font-size: 10px; color: var(--blue); font-weight: 700; }
+.band-num {
+  position: absolute; top: 50%; left: 6px; transform: translateY(-50%);
+  width: 14px; height: 14px; border-radius: 50%; background: var(--blue); color: var(--bg);
+  display: grid; place-items: center; font-size: 9px; font-weight: 700; line-height: 1;
+}
 .filter-ctl { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 260px; }
 .filter-ctl .slider { grid-template-columns: 0 1fr 64px; }
 

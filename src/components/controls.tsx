@@ -30,6 +30,8 @@ interface SliderProps {
 export function Slider({ label, value, min, max, step, onChange, format, defaultValue, disabled, scale = 'linear', title }: SliderProps) {
   const toPos = (v: number) => (scale === 'log' ? (Math.log(v / min) / Math.log(max / min)) * 1000 : v);
   const fromPos = (p: number) => (scale === 'log' ? min * Math.pow(max / min, p / 1000) : p);
+  // Reserve room for the widest end-of-range label so the track doesn't resize (and shift under the pointer) as the value text changes.
+  const valueWidth = format ? Math.max(format(min).length, format(max).length) : Math.max(String(min).length, String(max).length);
   return (
     <label className={`slider ${disabled ? 'disabled' : ''}`} title={title}>
       <span className="slider-label">{label}</span>
@@ -46,7 +48,9 @@ export function Slider({ label, value, min, max, step, onChange, format, default
         }}
         onDoubleClick={() => defaultValue !== undefined && onChange(defaultValue)}
       />
-      <span className="slider-value">{format ? format(value) : value}</span>
+      <span className="slider-value" style={{ minWidth: `${valueWidth}ch` }}>
+        {format ? format(value) : value}
+      </span>
     </label>
   );
 }
