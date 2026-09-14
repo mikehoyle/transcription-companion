@@ -124,7 +124,7 @@ function Welcome() {
         <li><b>Note & chord guessing</b><span>Pitch spectrum on a keyboard, chord names, pitch roll & chord timeline.</span></li>
         <li><b>Tempo, beats & key</b><span>Auto-detected BPM & key, tap tempo, beat grid, metronome.</span></li>
         <li><b>Isolate parts</b><span>Parametric EQ, karaoke vocal cancel, L/R/mono channels.</span></li>
-        <li><b>Markers & sections</b><span>Tap markers while listening, loop between sections.</span></li>
+        <li><b>Markers</b><span>Tap markers while listening, loop between markers.</span></li>
         <li><b>Export & sessions</b><span>Render processed WAVs; save your markers and loops to a file.</span></li>
       </ul>
       <p className="privacy">

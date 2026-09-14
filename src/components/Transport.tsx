@@ -77,11 +77,8 @@ export function Transport() {
       </div>
 
       <div className="transport-group">
-        <button className="chip" title="Add marker at playhead (M)" onClick={() => c.addMarker('marker')}>
+        <button className="chip" title="Add marker at playhead (M)" onClick={() => c.addMarker()}>
           <Icon name="marker" size={14} /> Marker
-        </button>
-        <button className="chip" title="Add section marker (Shift+M)" onClick={() => c.addMarker('section')}>
-          <Icon name="marker" size={14} /> Section
         </button>
       </div>
 

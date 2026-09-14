@@ -21,7 +21,6 @@ export const SHORTCUTS: Shortcut[] = [
   { group: 'Loop', keys: 'Shift+[ / Shift+]', description: 'Move loop to previous / next phrase' },
   { group: 'Loop', keys: 'S', description: 'Save current loop' },
   { group: 'Markers', keys: 'M', description: 'Add marker at playhead (works while playing)' },
-  { group: 'Markers', keys: 'Shift+M', description: 'Add section marker' },
   { group: 'Markers', keys: '1 … 9', description: 'Jump to marker N' },
   { group: 'Markers', keys: ', / .', description: 'Previous / next marker' },
   { group: 'Tempo', keys: 'T', description: 'Tap tempo' },
@@ -112,7 +111,7 @@ export function installShortcuts() {
         c.saveCurrentLoop();
         break;
       case 'm':
-        c.addMarker(shift ? 'section' : 'marker');
+        c.addMarker();
         break;
       case ',':
       case '<':

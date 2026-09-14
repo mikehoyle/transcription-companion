@@ -20,7 +20,7 @@ exported on your machine, and nothing is uploaded or persisted. The container on
 | **Note & chord guessing** | Live pitch spectrum at the playhead drawn on an 88-key keyboard with guessed notes and chord name (incl. slash chords); click keys for a reference tone. Transposing-instrument display (B♭, E♭, F, guitar). |
 | **Pitch roll & chord lane** | Whole-song constant-semitone spectrogram aligned with the waveform, plus an automatic chord timeline. |
 | **Isolate parts** | 6-band parametric EQ with draggable response curve, high/low-pass filters, instrument presets; stereo / mono / left / right / swap / karaoke (centre cancel, with bass restore); balance & volume. |
-| **Markers** | Tap markers and section markers while listening, rename, drag, jump with 1–9, loop from a marker to the next. |
+| **Markers** | Tap markers while listening, rename, drag, jump with 1–9, loop from a marker to the next. |
 | **Export** | Render the loop or whole file to WAV with the current speed, pitch, channel and EQ settings. |
 | **Sessions** | Save/load markers, loops, tempo and settings as a small JSON file (nothing is stored in the browser). |
 | **Keyboard** | Extensive shortcuts — press `?` in the app for the full list. |

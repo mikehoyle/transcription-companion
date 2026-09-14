@@ -2,7 +2,7 @@ import { useEffect, useRef, type RefObject } from 'react';
 import { engine } from '../audio/engine';
 import { formatChord, noteName } from '../audio/music';
 import * as c from '../controller';
-import { store, useStore, type AppState } from '../store';
+import { markerColor, store, useStore, type AppState } from '../store';
 import { fmtTime } from '../util';
 import { fitCanvas, useAnimationFrame } from './controls';
 
@@ -23,8 +23,6 @@ const COL = {
   loopOff: 'rgba(160,160,160,0.10)',
   loopEdge: '#f5a524',
   loopEdgeOff: '#80776a',
-  section: '#3ecf8e',
-  marker: '#c792ea',
   bar: 'rgba(255,255,255,0.20)',
   beat: 'rgba(255,255,255,0.07)',
   chordBg: '#1a1e27',
@@ -345,9 +343,9 @@ function drawMarkers(ctx: CanvasRenderingContext2D, s: AppState, w: number, top:
   s.markers.forEach((mk, i) => {
     const x = Math.round(m.x(mk.time)) + 0.5;
     if (x < GUTTER || x > w) return;
-    const col = mk.kind === 'section' ? COL.section : COL.marker;
+    const col = markerColor(mk);
     ctx.strokeStyle = col;
-    ctx.setLineDash(mk.kind === 'section' ? [] : [3, 3]);
+    ctx.setLineDash([3, 3]);
     ctx.beginPath();
     ctx.moveTo(x, top);
     ctx.lineTo(x, bottom);

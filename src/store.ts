@@ -17,14 +17,19 @@ export interface EqState {
   bands: EqBand[];
 }
 
-export type MarkerKind = 'section' | 'marker';
+/** Preset marker colours, cycled through as markers are added. Chosen to stay distinct from the playhead and loop colours. */
+export const MARKER_COLORS = ['#c792ea', '#3ecf8e', '#82aaff', '#ff79c6', '#e6db74', '#5ee7f0'];
 
 export interface Marker {
   id: string;
   time: number;
   label: string;
-  kind: MarkerKind;
+  /** Index into MARKER_COLORS. */
+  color: number;
 }
+
+// Sessions saved before markers had colours have no `color` field.
+export const markerColor = (m: Marker) => MARKER_COLORS[(m.color ?? 0) % MARKER_COLORS.length];
 
 export interface SavedLoop {
   id: string;

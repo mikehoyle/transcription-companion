@@ -4,7 +4,7 @@ import { ANALYSIS_RATE, NOTE_COUNT, NOTE_MIN } from './audio/music';
 import type { AnalysisMessage } from './audio/analysis.worker';
 import { renderProcessed } from './audio/export';
 import { downloadBlob } from './audio/wav';
-import { DEFAULT_EQ, initialState, store, uid, type AppState, type MarkerKind } from './store';
+import { DEFAULT_EQ, initialState, MARKER_COLORS, store, uid, type AppState } from './store';
 import { clamp } from './util';
 
 // ------------------------------------------------------------ heavy data
@@ -283,15 +283,21 @@ export const deleteLoop = (id: string) => store.set((s) => ({ loops: s.loops.fil
 
 // ------------------------------------------------------------ markers
 
-export function addMarker(kind: MarkerKind, at = pos()) {
+export function addMarker(at = pos()) {
   const s = store.get();
   const t = snap(at);
-  const count = s.markers.filter((m) => m.kind === kind).length + 1;
-  // Plain markers are identified by their index (shown on the flag), so they start unlabelled.
-  const label = kind === 'section' ? `Section ${String.fromCharCode(64 + Math.min(count, 26))}` : '';
-  const markers = [...s.markers, { id: uid(), time: t, label, kind }].sort((a, b) => a.time - b.time);
+  // Give each new marker the least-used colour, so colours rotate through the palette.
+  const uses = MARKER_COLORS.map((_, i) => s.markers.filter((m) => (m.color ?? 0) === i).length);
+  const color = uses.indexOf(Math.min(...uses));
+  // Markers are identified by their index (shown on the flag), so they start unlabelled.
+  const markers = [...s.markers, { id: uid(), time: t, label: '', color }].sort((a, b) => a.time - b.time);
   store.set({ markers });
 }
+
+export const cycleMarkerColor = (id: string) =>
+  store.set((s) => ({
+    markers: s.markers.map((m) => (m.id === id ? { ...m, color: ((m.color ?? 0) + 1) % MARKER_COLORS.length } : m)),
+  }));
 
 export const renameMarker = (id: string, label: string) =>
   store.set((s) => ({ markers: s.markers.map((m) => (m.id === id ? { ...m, label } : m)) }));
