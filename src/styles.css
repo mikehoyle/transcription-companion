@@ -280,11 +280,15 @@ input[type='range'] { width: 100%; accent-color: var(--accent); min-width: 60px;
 @keyframes spin { to { transform: rotate(360deg); } }
 .progress { height: 6px; background: var(--surface-3); border-radius: 3px; overflow: hidden; }
 .progress div { height: 100%; background: var(--accent); transition: width 0.2s; }
-.toast {
+.toasts {
   position: fixed; bottom: 18px; left: 50%; transform: translateX(-50%);
-  background: #3a1a1d; border: 1px solid #6b2a30; color: #ffd9dc;
-  padding: 10px 12px 10px 16px; border-radius: 10px; display: flex; gap: 10px; align-items: center; z-index: 110; max-width: 90vw;
+  display: flex; flex-direction: column; align-items: center; gap: 8px; z-index: 110; max-width: 90vw;
 }
+.toast {
+  background: #3a1a1d; border: 1px solid #6b2a30; color: #ffd9dc;
+  padding: 10px 12px 10px 16px; border-radius: 10px; display: flex; gap: 10px; align-items: center;
+}
+.toast.notice { background: var(--surface-3); border-color: var(--border); color: var(--text); box-shadow: 0 6px 20px rgba(0,0,0,0.35); }
 .drag-overlay {
   position: fixed; inset: 10px; border: 3px dashed var(--accent); border-radius: 18px;
   background: rgba(245,165,36,0.08); display: grid; place-items: center;

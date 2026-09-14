@@ -68,6 +68,7 @@ export interface AppState {
   file: FileInfo | null;
   loading: { message: string; progress: number | null } | null;
   error: string | null;
+  notice: string | null; // brief, non-error message shown in a self-dismissing toast
 
   playing: boolean;
   playStart: number; // position where playback was last started (for "return")
@@ -139,6 +140,7 @@ export const initialState = (): AppState => ({
   file: null,
   loading: null,
   error: null,
+  notice: null,
   playing: false,
   playStart: 0,
   rate: 1,

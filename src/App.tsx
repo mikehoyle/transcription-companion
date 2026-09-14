@@ -140,6 +140,14 @@ function Welcome() {
 function Overlays() {
   const loading = useStore((s) => s.loading);
   const error = useStore((s) => s.error);
+  const notice = useStore((s) => s.notice);
+
+  useEffect(() => {
+    if (!notice) return;
+    const t = setTimeout(() => store.get().notice === notice && store.set({ notice: null }), 4000);
+    return () => clearTimeout(t);
+  }, [notice]);
+
   return (
     <>
       {loading && (
@@ -155,14 +163,24 @@ function Overlays() {
           </div>
         </div>
       )}
-      {error && (
-        <div className="toast" role="alert">
-          <span>{error}</span>
-          <button className="icon-btn small" onClick={() => store.set({ error: null })}>
-            <Icon name="close" size={14} />
-          </button>
-        </div>
-      )}
+      <div className="toasts">
+        {notice && (
+          <div className="toast notice" role="status">
+            <span>{notice}</span>
+            <button className="icon-btn small" onClick={() => store.set({ notice: null })}>
+              <Icon name="close" size={14} />
+            </button>
+          </div>
+        )}
+        {error && (
+          <div className="toast" role="alert">
+            <span>{error}</span>
+            <button className="icon-btn small" onClick={() => store.set({ error: null })}>
+              <Icon name="close" size={14} />
+            </button>
+          </div>
+        )}
+      </div>
     </>
   );
 }
@@ -175,8 +193,10 @@ export default function App() {
   useEffect(() => {
     const offController = c.initController();
     const offKeys = installShortcuts();
-    void loadRecentFile().then((f) => {
-      if (f && !store.get().file && !store.get().loading) void c.openFile(f);
+    void loadRecentFile().then(async (f) => {
+      if (!f || store.get().file || store.get().loading) return;
+      await c.openFile(f);
+      if (store.get().file) store.set({ notice: 'Resumed your existing local session' });
     });
     return () => {
       offController();
