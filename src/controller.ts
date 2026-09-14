@@ -5,6 +5,7 @@ import type { AnalysisMessage } from './audio/analysis.worker';
 import { renderProcessed } from './audio/export';
 import { downloadBlob } from './audio/wav';
 import { DEFAULT_EQ, initialState, MARKER_COLORS, store, uid, type AppState, type FileInfo } from './store';
+import { saveRecentFile } from './recentFile';
 import { clamp } from './util';
 
 // ------------------------------------------------------------ heavy data
@@ -96,6 +97,7 @@ export async function openFile(file: File) {
       ...saved?.patch,
     });
     engine.seek(saved?.position ?? 0);
+    void saveRecentFile(file);
     void startAnalysis(buffer);
   } catch (e) {
     console.error(e);

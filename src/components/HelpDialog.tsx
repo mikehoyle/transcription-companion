@@ -38,8 +38,9 @@ export function HelpDialog() {
             <li><b>Karaoke</b> mode cancels centre-panned sound (often lead vocal); try <b>Left/Right only</b> for hard-panned parts.</li>
           </ul>
           <p className="muted">
-            Everything happens locally in your browser. Audio files are never uploaded anywhere, and nothing is stored when you close
-            the tab — use <b>Save session</b> to keep your markers, loops and settings as a file.
+            Everything happens locally in your browser. Audio files are never uploaded anywhere. Your markers, loops and settings are
+            remembered per file in this browser, and your last file (up to 100 MB) is reopened on your next visit — use{' '}
+            <b>Save session</b> to keep them as a file you can move elsewhere.
           </p>
         </section>
         <section>

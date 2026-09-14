@@ -22,7 +22,7 @@ exported on your machine, and nothing is uploaded or persisted. The container on
 | **Isolate parts** | 6-band parametric EQ with draggable response curve, high/low-pass filters, instrument presets; stereo / mono / left / right / swap / karaoke (centre cancel, with bass restore); balance & volume. |
 | **Markers** | Tap markers while listening, rename, drag, jump with 1–9, loop from a marker to the next. |
 | **Export** | Render the loop or whole file to WAV with the current speed, pitch, channel and EQ settings. |
-| **Sessions** | Save/load markers, loops, tempo and settings as a small JSON file (nothing is stored in the browser). |
+| **Sessions** | Markers, loops, tempo and settings are autosaved per file in the browser (localStorage) and restored when you reopen it; the last opened file (up to 100 MB) is kept in IndexedDB and reopened on your next visit. Sessions can also be saved/loaded as a small JSON file. |
 | **Keyboard** | Extensive shortcuts — press `?` in the app for the full list. |
 
 ## Running locally

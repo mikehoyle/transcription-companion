@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ACCEPT } from './audio/decode';
 import * as c from './controller';
 import { installShortcuts } from './shortcuts';
+import { forgetRecentFile, loadRecentFile, RECENT_FILE_MAX_BYTES } from './recentFile';
 import { store, useStore } from './store';
 import { fmtBytes, fmtTime } from './util';
 import { HelpDialog } from './components/HelpDialog';
@@ -79,6 +80,7 @@ function Header() {
               <div className="menu-items" onClick={(e) => (e.currentTarget.parentElement as HTMLDetailsElement).removeAttribute('open')}>
                 <button onClick={c.saveSession}>Save markers, loops & settings…</button>
                 <button onClick={() => sessionInput.current?.click()}>Load session file…</button>
+                <button onClick={() => void forgetRecentFile()}>Don't reopen this file on next visit</button>
               </div>
             </details>
             <input
@@ -128,7 +130,8 @@ function Welcome() {
         <li><b>Export & sessions</b><span>Render processed WAVs; save your markers and loops to a file.</span></li>
       </ul>
       <p className="privacy">
-        🔒 100% local: files are processed in your browser and never uploaded. Nothing is stored after you close the tab.
+        🔒 100% local: files are processed in your browser and never uploaded. Your last file (up to{' '}
+        {RECENT_FILE_MAX_BYTES / 1024 / 1024} MB) and per-song settings are kept in this browser so you can pick up where you left off.
       </p>
     </div>
   );
@@ -172,6 +175,9 @@ export default function App() {
   useEffect(() => {
     const offController = c.initController();
     const offKeys = installShortcuts();
+    void loadRecentFile().then((f) => {
+      if (f && !store.get().file && !store.get().loading) void c.openFile(f);
+    });
     return () => {
       offController();
       offKeys();
@@ -222,9 +228,9 @@ export default function App() {
             <SpeedPitchPanel />
             <LoopPanel />
             <TempoPanel />
+            <MarkersPanel />
             <NotesPanel />
             <SoundPanel />
-            <MarkersPanel />
           </div>
         </main>
       ) : (
