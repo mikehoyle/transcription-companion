@@ -4,7 +4,7 @@ import { ANALYSIS_RATE, NOTE_COUNT, NOTE_MIN } from './audio/music';
 import type { AnalysisMessage } from './audio/analysis.worker';
 import { renderProcessed } from './audio/export';
 import { downloadBlob } from './audio/wav';
-import { DEFAULT_EQ, initialState, MARKER_COLORS, store, uid, type AppState } from './store';
+import { DEFAULT_EQ, initialState, MARKER_COLORS, store, uid, type AppState, type FileInfo } from './store';
 import { clamp } from './util';
 
 // ------------------------------------------------------------ heavy data
@@ -19,6 +19,8 @@ export interface Peaks {
 let peaks: Peaks | null = null;
 let analysisSignal: Float32Array | null = null;
 let worker: Worker | null = null;
+/** Tempo came from a saved session, so analysis should only report the detected BPM. */
+let userTempo = false;
 
 export const getPeaks = () => peaks;
 export const getAnalysisSignal = () => analysisSignal;
@@ -53,6 +55,7 @@ export async function openFile(file: File) {
   const prev = store.get();
   if (prev.loading) return;
   engine.pause();
+  saveLocalSessionNow();
   store.set({ loading: { message: `Opening ${file.name}…`, progress: null }, error: null });
   try {
     const ctx = await engine.init();
@@ -64,29 +67,35 @@ export async function openFile(file: File) {
 
     if (prev.file?.videoUrl) URL.revokeObjectURL(prev.file.videoUrl);
     const fresh = initialState();
-    // Keep user preferences (processing & display) across files; reset song-specific data.
+    const info: FileInfo = {
+      name: file.name,
+      size: file.size,
+      duration: buffer.duration,
+      sampleRate: buffer.sampleRate,
+      channels: buffer.numberOfChannels,
+      decoder,
+      videoUrl: isVideoFile(file) ? URL.createObjectURL(file) : null,
+    };
+    const saved = readLocalSession(info);
+    // Only trust a saved tempo once analysis had run for it (otherwise it's just the default).
+    userTempo = saved?.patch.tempo?.detectedBpm != null;
+    // Keep user preferences (processing & display) across files; reset song-specific data,
+    // then resume whatever was autosaved for this file last time.
     store.set({
-      file: {
-        name: file.name,
-        size: file.size,
-        duration: buffer.duration,
-        sampleRate: buffer.sampleRate,
-        channels: buffer.numberOfChannels,
-        decoder,
-        videoUrl: isVideoFile(file) ? URL.createObjectURL(file) : null,
-      },
+      file: info,
       loading: null,
       playing: false,
-      playStart: 0,
+      playStart: saved?.position ?? 0,
       loop: fresh.loop,
       markers: [],
       loops: [],
       trainer: { ...prev.trainer, rep: 0 },
       tempo: fresh.tempo,
-      view: { start: 0, end: buffer.duration },
+      view: saved?.view ?? { start: 0, end: buffer.duration },
       analysis: { ...fresh.analysis, status: 'running' },
+      ...saved?.patch,
     });
-    engine.seek(0);
+    engine.seek(saved?.position ?? 0);
     void startAnalysis(buffer);
   } catch (e) {
     console.error(e);
@@ -118,9 +127,12 @@ async function startAnalysis(buffer: AudioBuffer) {
             chords: msg.chords,
             roll: { hopSec: msg.hopSec, frames: msg.frames, noteMin: NOTE_MIN, noteCount: NOTE_COUNT, data: msg.roll },
           },
-          tempo: msg.tempo
-            ? { ...s.tempo, bpm: msg.tempo.bpm, offset: msg.tempo.offset, detectedBpm: msg.tempo.bpm }
-            : s.tempo,
+          // Don't clobber a tempo the user restored from a saved session.
+          tempo: !msg.tempo
+            ? s.tempo
+            : userTempo
+              ? { ...s.tempo, detectedBpm: msg.tempo.bpm }
+              : { ...s.tempo, bpm: msg.tempo.bpm, offset: msg.tempo.offset, detectedBpm: msg.tempo.bpm },
         }));
         w.terminate();
         worker = null;
@@ -137,7 +149,18 @@ async function startAnalysis(buffer: AudioBuffer) {
 // ------------------------------------------------------------ engine sync
 
 export function initController() {
-  return store.subscribe((s, p) => {
+  const flush = () => saveLocalSessionNow();
+  const onVisibility = () => document.visibilityState === 'hidden' && flush();
+  window.addEventListener('pagehide', flush);
+  document.addEventListener('visibilitychange', onVisibility);
+  const unsubscribe = store.subscribe((s, p) => {
+    if (
+      s.file &&
+      s.file === p.file &&
+      (s.playing !== p.playing || s.playStart !== p.playStart || s.view !== p.view || SESSION_KEYS.some((k) => s[k] !== p[k]))
+    ) {
+      scheduleLocalSave();
+    }
     if (s.rate !== p.rate || s.semitones !== p.semitones || s.cents !== p.cents || s.formant !== p.formant) {
       engine.updateParams();
     }
@@ -154,6 +177,11 @@ export function initController() {
       engine.loopChanged();
     }
   });
+  return () => {
+    unsubscribe();
+    window.removeEventListener('pagehide', flush);
+    document.removeEventListener('visibilitychange', onVisibility);
+  };
 }
 
 // ------------------------------------------------------------ helpers
@@ -479,15 +507,21 @@ export function saveSession() {
   downloadBlob(blob, `${s.file.name.replace(/\.[^.]+$/, '')}.tcsession.json`);
 }
 
+function sessionPatch(data: Record<string, unknown>): Partial<AppState> {
+  const patch: Partial<AppState> = {};
+  const defaults = initialState();
+  for (const k of SESSION_KEYS) {
+    if (k in data && typeof data[k] === typeof defaults[k]) (patch as Record<string, unknown>)[k] = data[k];
+  }
+  return patch;
+}
+
 export async function loadSession(file: File) {
   try {
     const data = JSON.parse(await file.text());
     if (data?.app !== 'transcription-companion') throw new Error('Not a Learn By Ear session file.');
-    const patch: Partial<AppState> = {};
-    const defaults = initialState();
-    for (const k of SESSION_KEYS) {
-      if (k in data && typeof data[k] === typeof defaults[k]) (patch as Record<string, unknown>)[k] = data[k];
-    }
+    const patch = sessionPatch(data);
+    if (patch.tempo) userTempo = true;
     store.set(patch);
     const s = store.get();
     if (s.file && data.fileName && data.fileName !== s.file.name) {
@@ -496,4 +530,89 @@ export async function loadSession(file: File) {
   } catch (e) {
     store.set({ error: `Could not load session: ${e instanceof Error ? e.message : e}` });
   }
+}
+
+// ------------------------------------------------------------ local autosave
+// Every file gets its own session in localStorage, resumed next time the same file is opened.
+
+const LOCAL_PREFIX = 'learn-by-ear:session:';
+const LOCAL_MAX_SESSIONS = 100;
+const LOCAL_SAVE_DELAY = 400;
+
+// Name alone collides too easily (e.g. "Track 01.mp3"), so include size and decoded duration.
+const localKey = (f: FileInfo) => `${LOCAL_PREFIX}${JSON.stringify([f.name, f.size, Math.round(f.duration * 1000)])}`;
+
+let saveTimer: ReturnType<typeof setTimeout> | null = null;
+
+function readLocalSession(f: FileInfo): { patch: Partial<AppState>; position: number; view: AppState['view'] | null } | null {
+  try {
+    const raw = localStorage.getItem(localKey(f));
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (data?.app !== 'transcription-companion') return null;
+    const patch = sessionPatch(data);
+    if (patch.trainer) patch.trainer = { ...patch.trainer, rep: 0 };
+    const position = Number.isFinite(data.position) ? clamp(data.position, 0, f.duration) : 0;
+    const v = data.view;
+    const view =
+      Number.isFinite(v?.start) && Number.isFinite(v?.end) && v.start >= 0 && v.end <= f.duration && v.end > v.start
+        ? { start: v.start, end: v.end }
+        : null;
+    return { patch, position, view };
+  } catch {
+    return null;
+  }
+}
+
+function scheduleLocalSave() {
+  if (saveTimer) clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveLocalSessionNow, LOCAL_SAVE_DELAY);
+}
+
+function saveLocalSessionNow() {
+  if (saveTimer) clearTimeout(saveTimer);
+  saveTimer = null;
+  const s = store.get();
+  if (!s.file) return;
+  const data: Record<string, unknown> = {
+    app: 'transcription-companion',
+    version: 1,
+    fileName: s.file.name,
+    duration: s.file.duration,
+    savedAt: Date.now(),
+    position: engine.getPosition(),
+    view: s.view,
+  };
+  for (const k of SESSION_KEYS) data[k] = s[k];
+  const key = localKey(s.file);
+  const json = JSON.stringify(data);
+  try {
+    const isNew = localStorage.getItem(key) === null;
+    try {
+      localStorage.setItem(key, json);
+    } catch {
+      // Probably over quota: make room by dropping the oldest sessions, then retry once.
+      pruneLocalSessions(key, Math.floor(LOCAL_MAX_SESSIONS / 2));
+      localStorage.setItem(key, json);
+    }
+    if (isNew) pruneLocalSessions(key, LOCAL_MAX_SESSIONS);
+  } catch (e) {
+    console.warn('Could not autosave session', e);
+  }
+}
+
+/** Keep at most `max` sessions (always including `keep`), dropping the least recently saved. */
+function pruneLocalSessions(keep: string, max: number) {
+  const entries: { key: string; savedAt: number }[] = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (!key?.startsWith(LOCAL_PREFIX) || key === keep) continue;
+    let savedAt = 0;
+    try {
+      savedAt = JSON.parse(localStorage.getItem(key) ?? '{}').savedAt ?? 0;
+    } catch {}
+    entries.push({ key, savedAt });
+  }
+  entries.sort((a, b) => b.savedAt - a.savedAt);
+  for (const { key } of entries.slice(Math.max(0, max - 1))) localStorage.removeItem(key);
 }
