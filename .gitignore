@@ -4,3 +4,4 @@ public/ffmpeg
 .wrangler
 *.log
 .DS_Store
+.claude/launch.json
