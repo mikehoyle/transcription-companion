@@ -135,6 +135,7 @@ select {
 .feature-grid span { color: var(--muted); font-size: 13px; }
 .disclaimers { color: var(--muted); font-size: 13px; display: flex; flex-direction: column; gap: 6px; margin: 13px 0; }
 .disclaimers p { margin: 0; }
+.disclaimers .free-note { text-align: center; }
 
 /* ---------- workspace ---------- */
 .workspace { display: flex; flex-direction: column; flex: 1; min-width: 0; }

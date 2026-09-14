@@ -144,7 +144,7 @@ function Welcome() {
           🔒 100% local: files are processed in your browser and never uploaded. Your last file (up to{' '}
           {RECENT_FILE_MAX_BYTES / 1024 / 1024} MB) and per-song settings are kept in this browser so you can pick up where you left off.
         </p>
-        <p>100% free: No subscriptions, no premium-only features</p>
+        <p className="free-note">100% free: No subscriptions, no premium-only features.</p>
       </div>
     </main>
   );
