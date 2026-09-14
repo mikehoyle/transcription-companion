@@ -1,4 +1,4 @@
-# Transcription Companion
+# Learn By Ear Transcription Companion
 
 A browser-based practice and transcription tool for learning music by ear: slow recordings down, loop
 tricky passages, transpose, and see which notes and chords are sounding.
