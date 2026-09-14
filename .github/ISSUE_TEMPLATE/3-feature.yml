@@ -1,0 +1,11 @@
+name: Feature idea
+description: Suggest something new or a change to how something works.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: What would you like?
+      description: Describe the idea, and what you're practicing or transcribing when you'd use it.
+    validations:
+      required: true

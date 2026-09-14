@@ -1,0 +1,30 @@
+name: Detection was off
+description: Tempo, key, notes or chords came out wrong.
+labels: [detection]
+body:
+  - type: markdown
+    attributes:
+      value: Detection is always a best guess, but real examples of where it goes wrong help improve it.
+  - type: dropdown
+    id: area
+    attributes:
+      label: What was off?
+      multiple: true
+      options:
+        - Tempo / beat grid
+        - Key
+        - Notes
+        - Chords
+  - type: textarea
+    id: details
+    attributes:
+      label: What did it show, and what's correct?
+      placeholder: Around 1:32 it shows Em, but the chord is G/B.
+    validations:
+      required: true
+  - type: input
+    id: recording
+    attributes:
+      label: Recording
+      description: Song and artist, or a link to a public recording.
+      placeholder: e.g. "Blue in Green" – Miles Davis

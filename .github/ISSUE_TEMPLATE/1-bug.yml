@@ -1,0 +1,31 @@
+name: Bug report
+description: Something isn't working the way it should.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for reporting this! A few sentences is plenty.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What were you doing, what did you expect, and what happened instead?
+      placeholder: I looped a passage at 50% speed and the audio started crackling after a few repeats.
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Browser and device
+      placeholder: e.g. Chrome on Windows, Safari on iPad
+  - type: input
+    id: file
+    attributes:
+      label: File type
+      description: If the problem involves a particular file.
+      placeholder: e.g. MP3, M4A voice memo, MKV video
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else?
+      description: Screenshots, error messages, or steps to reproduce. Please don't attach copyrighted recordings. A song name or link is enough.
