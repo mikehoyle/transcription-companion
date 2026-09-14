@@ -42,7 +42,10 @@ function Header() {
     <header className="app-header">
       <div className="brand">
         <img src="./favicon.svg" alt="" width={26} height={26} />
-        <span>Transcription Companion</span>
+        <span className="brand-text">
+          <span className="brand-name">Learn By Ear</span>
+          <span className="brand-subtitle">Transcription Companion</span>
+        </span>
       </div>
       <button className="btn primary" onClick={() => fileInput.current?.click()}>
         <Icon name="open" size={16} /> Open audio / video

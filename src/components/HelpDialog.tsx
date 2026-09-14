@@ -19,7 +19,7 @@ export function HelpDialog() {
   return (
     <dialog ref={ref} className="help" onClose={() => store.set({ helpOpen: false })} onClick={(e) => e.target === ref.current && store.set({ helpOpen: false })}>
       <header>
-        <h2>Transcription Companion — help</h2>
+        <h2>Learn By Ear — help</h2>
         <button className="icon-btn" onClick={() => store.set({ helpOpen: false })} title="Close (Esc)">
           <Icon name="close" />
         </button>

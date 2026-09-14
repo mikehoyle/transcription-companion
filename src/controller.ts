@@ -476,7 +476,7 @@ export function saveSession() {
 export async function loadSession(file: File) {
   try {
     const data = JSON.parse(await file.text());
-    if (data?.app !== 'transcription-companion') throw new Error('Not a Transcription Companion session file.');
+    if (data?.app !== 'transcription-companion') throw new Error('Not a Learn By Ear session file.');
     const patch: Partial<AppState> = {};
     const defaults = initialState();
     for (const k of SESSION_KEYS) {
