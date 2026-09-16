@@ -109,12 +109,20 @@ src/
   store.ts             tiny external store used with useSyncExternalStore
   shortcuts.ts         keyboard shortcuts
   *.test.ts            unit tests, run with `npm test` (Vitest)
+  audio/fakeAudioContext.ts  test-only stand-in for the Web Audio nodes chain.ts builds
 ```
 
 The tests cover the parts where a mistake is silent rather than loud: the FFT (against a
 naive DFT), note/chord/key/tempo detection on synthesised audio, the analysis worker
-end-to-end over a known progression, session validation, the WAV encoder and the
-view/loop/marker logic in the controller.
+end-to-end over a known progression, session validation, the WAV encoder, the processing
+chain's routing and filter settings, the remembered-file store, and the view/loop/marker
+logic in the controller.
+
+They run in Node, with no browser: `chain.ts` is driven through a fake AudioContext that
+records what was built and what was written to each AudioParam, and `recentFile.ts`
+through `fake-indexeddb`. `engine.ts` and `export.ts` stay uncovered — the first needs its
+scheduling arithmetic separated from AudioContext time before it can be tested sensibly,
+the second needs an OfflineAudioContext that can actually run the stretch worklet.
 
 Note on the stretch node: `schedule()` replaces every change timed at or after the node's current time, so the engine
 keeps at most one future change pending and queues the second half of stop→resume pairs (loop gaps, count-ins) until the
