@@ -1,16 +1,6 @@
 /// <reference lib="webworker" />
 import { magnitudeSpectrum } from './fft';
-import {
-  ANALYSIS_RATE,
-  FRAME_SIZE,
-  NOTE_COUNT,
-  NOTE_MIN,
-  chroma,
-  detectKey,
-  detectTempo,
-  guessChord,
-  semitoneSpectrum,
-} from './music';
+import { ANALYSIS_RATE, FRAME_SIZE, NOTE_COUNT, NOTE_MIN, chroma, detectKey, detectTempo, guessChord, semitoneSpectrum } from './music';
 import type { ChordSegment } from '../store';
 
 export interface AnalysisRequest {
@@ -30,8 +20,7 @@ export type AnalysisMessage =
     }
   | { type: 'error'; message: string };
 
-const post = (msg: AnalysisMessage, transfer: Transferable[] = []) =>
-  (self as unknown as DedicatedWorkerGlobalScope).postMessage(msg, transfer);
+const post = (msg: AnalysisMessage, transfer: Transferable[] = []) => (self as unknown as DedicatedWorkerGlobalScope).postMessage(msg, transfer);
 
 self.onmessage = (e: MessageEvent<AnalysisRequest>) => {
   try {
@@ -79,7 +68,7 @@ function analyse(signal: Float32Array) {
   const silence = (sortedEnergy[Math.floor(sortedEnergy.length * 0.95)] ?? 0) * 0.05;
   const half = Math.max(1, Math.round(0.25 / hopSec));
   const labels: (string | null)[] = new Array(frames).fill(null);
-  const guesses: (ReturnType<typeof guessChord>)[] = new Array(frames).fill(null);
+  const guesses: ReturnType<typeof guessChord>[] = new Array(frames).fill(null);
   const keyChroma = new Float64Array(12);
   const frameSpec = (f: number) => raw.subarray(f * NOTE_COUNT, (f + 1) * NOTE_COUNT);
 

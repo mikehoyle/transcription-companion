@@ -36,7 +36,7 @@ export function Slider({ label, value, min, max, step, onChange, format, default
   // Reserve room for the widest end-of-range label so the track doesn't resize (and shift under the pointer) as the value text changes.
   const valueWidth = format ? Math.max(format(min).length, format(max).length) : Math.max(String(min).length, String(max).length);
   // On a log scale the input's own value is a position, not the value, so spell the value out.
-  const valueText = (format?.(value)) || (scale === 'log' ? String(value) : '');
+  const valueText = format?.(value) || (scale === 'log' ? String(value) : '');
   return (
     <label className={`slider ${disabled ? 'disabled' : ''}`} title={title}>
       <span className="slider-label">{label}</span>

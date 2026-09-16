@@ -1,18 +1,6 @@
 import { useRef, useState } from 'react';
 import { engine } from '../audio/engine';
-import {
-  NOTE_COUNT,
-  NOTE_MIN,
-  chroma,
-  formatChord,
-  guessChord,
-  guessNotes,
-  midiToFreq,
-  noteName,
-  pcName,
-  spectrumAt,
-  toDisplayLevels,
-} from '../audio/music';
+import { NOTE_COUNT, NOTE_MIN, chroma, formatChord, guessChord, guessNotes, midiToFreq, noteName, pcName, spectrumAt, toDisplayLevels } from '../audio/music';
 import { getAnalysisSignal } from '../controller';
 import { store, useStore } from '../store';
 import { Panel, fitCanvas, useAnimationFrame } from './controls';

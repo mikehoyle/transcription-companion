@@ -108,7 +108,10 @@ export function createChain(ctx: BaseAudioContext): ProcessingChain {
       // filter is dropped and a filter with no band goes flat.
       bands.forEach((filter, i) => {
         const b = eq.bands[i];
-        if (!b) return set(filter.gain, 0, immediate);
+        if (!b) {
+          set(filter.gain, 0, immediate);
+          return;
+        }
         set(filter.frequency, b.freq, immediate);
         set(filter.Q, b.q, immediate);
         set(filter.gain, eq.enabled ? b.gain : 0, immediate);

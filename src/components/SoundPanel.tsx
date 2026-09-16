@@ -222,26 +222,91 @@ export function SoundPanel() {
           // biome-ignore lint/suspicious/noArrayIndexKey: the six bands are a fixed list, never reordered or removed
           <div key={i} className="eq-band">
             <span className="band-num">{i + 1}</span>
-            <Slider label="Gain" ariaLabel={`Band ${i + 1} gain`} value={b.gain} min={-24} max={24} step={0.5} defaultValue={0} onChange={(v) => setBand(i, { gain: v })} format={(v) => `${v > 0 ? '+' : ''}${v.toFixed(1)} dB`} />
-            <Slider label="Freq" ariaLabel={`Band ${i + 1} frequency`} value={b.freq} min={20} max={20000} step={1} scale="log" onChange={(v) => setBand(i, { freq: v })} format={(v) => `${fmtFreq(v)} Hz`} />
-            <Slider label="Q" ariaLabel={`Band ${i + 1} width (Q)`} value={b.q} min={0.2} max={12} step={0.05} defaultValue={0.9} onChange={(v) => setBand(i, { q: v })} format={(v) => v.toFixed(2)} />
+            <Slider
+              label="Gain"
+              ariaLabel={`Band ${i + 1} gain`}
+              value={b.gain}
+              min={-24}
+              max={24}
+              step={0.5}
+              defaultValue={0}
+              onChange={(v) => setBand(i, { gain: v })}
+              format={(v) => `${v > 0 ? '+' : ''}${v.toFixed(1)} dB`}
+            />
+            <Slider
+              label="Freq"
+              ariaLabel={`Band ${i + 1} frequency`}
+              value={b.freq}
+              min={20}
+              max={20000}
+              step={1}
+              scale="log"
+              onChange={(v) => setBand(i, { freq: v })}
+              format={(v) => `${fmtFreq(v)} Hz`}
+            />
+            <Slider
+              label="Q"
+              ariaLabel={`Band ${i + 1} width (Q)`}
+              value={b.q}
+              min={0.2}
+              max={12}
+              step={0.05}
+              defaultValue={0.9}
+              onChange={(v) => setBand(i, { q: v })}
+              format={(v) => v.toFixed(2)}
+            />
           </div>
         ))}
       </div>
 
       <div className="field-row wrap">
         <div className="filter-ctl">
-          <Toggle checked={eq.hpOn} onChange={(v) => setEq({ hpOn: v, enabled: true })}>High-pass</Toggle>
-          <Slider label="" ariaLabel="High-pass frequency" value={eq.hpFreq} min={20} max={5000} step={1} scale="log" disabled={!eq.hpOn} onChange={(v) => setEq({ hpFreq: v })} format={(v) => `${fmtFreq(v)} Hz`} />
+          <Toggle checked={eq.hpOn} onChange={(v) => setEq({ hpOn: v, enabled: true })}>
+            High-pass
+          </Toggle>
+          <Slider
+            label=""
+            ariaLabel="High-pass frequency"
+            value={eq.hpFreq}
+            min={20}
+            max={5000}
+            step={1}
+            scale="log"
+            disabled={!eq.hpOn}
+            onChange={(v) => setEq({ hpFreq: v })}
+            format={(v) => `${fmtFreq(v)} Hz`}
+          />
         </div>
         <div className="filter-ctl">
-          <Toggle checked={eq.lpOn} onChange={(v) => setEq({ lpOn: v, enabled: true })}>Low-pass</Toggle>
-          <Slider label="" ariaLabel="Low-pass frequency" value={eq.lpFreq} min={200} max={20000} step={1} scale="log" disabled={!eq.lpOn} onChange={(v) => setEq({ lpFreq: v })} format={(v) => `${fmtFreq(v)} Hz`} />
+          <Toggle checked={eq.lpOn} onChange={(v) => setEq({ lpOn: v, enabled: true })}>
+            Low-pass
+          </Toggle>
+          <Slider
+            label=""
+            ariaLabel="Low-pass frequency"
+            value={eq.lpFreq}
+            min={200}
+            max={20000}
+            step={1}
+            scale="log"
+            disabled={!eq.lpOn}
+            onChange={(v) => setEq({ lpFreq: v })}
+            format={(v) => `${fmtFreq(v)} Hz`}
+          />
         </div>
       </div>
 
       <div className="field-row wrap">
-        <Slider label="Volume" value={volume * 100} min={0} max={200} step={1} defaultValue={100} onChange={(v) => store.set({ volume: v / 100 })} format={(v) => `${Math.round(v)}%`} />
+        <Slider
+          label="Volume"
+          value={volume * 100}
+          min={0}
+          max={200}
+          step={1}
+          defaultValue={100}
+          onChange={(v) => store.set({ volume: v / 100 })}
+          format={(v) => `${Math.round(v)}%`}
+        />
         <Slider
           label="Balance"
           value={pan}

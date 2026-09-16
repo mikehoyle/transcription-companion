@@ -19,7 +19,10 @@ export function fmtTime(sec: number, decimals = 2): string {
 
 /** Parses "1:23.4", "83.4", "1:02:03" into seconds, or null. */
 export function parseTime(text: string): number | null {
-  const parts = text.trim().split(':').map((p) => p.trim());
+  const parts = text
+    .trim()
+    .split(':')
+    .map((p) => p.trim());
   if (parts.some((p) => p === '' || Number.isNaN(Number(p)))) return null;
   return parts.reduce((acc, p) => acc * 60 + Number(p), 0);
 }
@@ -28,7 +31,7 @@ export function barBeat(pos: number, bpm: number, offset: number, beatsPerBar: n
   const beat = 60 / bpm;
   const beats = Math.floor((pos - offset) / beat + 1e-6);
   const bar = Math.floor(beats / beatsPerBar) + 1;
-  const b = ((beats % beatsPerBar) + beatsPerBar) % beatsPerBar + 1;
+  const b = (((beats % beatsPerBar) + beatsPerBar) % beatsPerBar) + 1;
   return `${bar}.${b}`;
 }
 

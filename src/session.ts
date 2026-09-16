@@ -5,6 +5,7 @@
 
 import { DEFAULT_EQ, initialState, MARKER_COLORS, uid, type AppState, type EqBand, type EqState, type Marker, type SavedLoop } from './store';
 
+// biome-ignore format: the compact grid is easier to scan against AppState
 export const SESSION_KEYS = [
   'rate', 'semitones', 'cents', 'formant', 'volume', 'pan', 'channelMode', 'karaokeKeepBass', 'eq',
   'loop', 'loopGap', 'countIn', 'trainer', 'markers', 'loops', 'tempo', 'gridVisible', 'snapToGrid',
@@ -24,8 +25,7 @@ const MAX_LABEL = 200;
 
 const bool = (v: unknown) => (typeof v === 'boolean' ? v : undefined);
 
-const num = (v: unknown, min: number, max: number) =>
-  typeof v === 'number' && Number.isFinite(v) && v >= min && v <= max ? v : undefined;
+const num = (v: unknown, min: number, max: number) => (typeof v === 'number' && Number.isFinite(v) && v >= min && v <= max ? v : undefined);
 
 const int = (v: unknown, min: number, max: number) => {
   const n = num(v, min, max);
@@ -39,8 +39,7 @@ const str = (v: unknown, maxLen: number) => (typeof v === 'string' ? v.slice(0, 
 const oneOf = <T extends string>(v: unknown, options: readonly T[]) => (options.includes(v as T) ? (v as T) : undefined);
 
 /** A plain object — unlike `typeof v === 'object'`, rejects null and arrays. */
-const rec = (v: unknown) =>
-  typeof v === 'object' && v !== null && !Array.isArray(v) ? (v as Record<string, unknown>) : undefined;
+const rec = (v: unknown) => (typeof v === 'object' && v !== null && !Array.isArray(v) ? (v as Record<string, unknown>) : undefined);
 
 /** Up to `max` items, dropping any the item parser rejects. */
 function arr<T>(v: unknown, max: number, item: (x: unknown) => T | undefined): T[] | undefined {

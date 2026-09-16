@@ -65,11 +65,7 @@ const pitchShift = (s: AppState) => Math.round(s.semitones + s.cents / 100);
 
 // ---------------------------------------------------------------- pointer
 
-type Drag =
-  | { type: 'pending'; x0: number; t0: number }
-  | { type: 'select'; t0: number }
-  | { type: 'marker'; id: string; moved: boolean }
-  | { type: 'loop-start' | 'loop-end' };
+type Drag = { type: 'pending'; x0: number; t0: number } | { type: 'select'; t0: number } | { type: 'marker'; id: string; moved: boolean } | { type: 'loop-start' | 'loop-end' };
 
 /** `mounted` must change whenever the canvas is conditionally rendered, so listeners get (re)attached. */
 function useTimelinePointer(ref: RefObject<HTMLCanvasElement | null>, hover: { current: number | null }, markerZone: boolean, mounted = true) {
@@ -212,7 +208,7 @@ function drawWaveLayer(ctx: CanvasRenderingContext2D, s: AppState, w: number, to
   const mid = top + h / 2;
   const amp = (h / 2) * 0.95;
   const sr = buffer.sampleRate;
-  const samplesPerPx = (sr / m.pxPerSec) / dpr;
+  const samplesPerPx = sr / m.pxPerSec / dpr;
   ctx.save();
   ctx.scale(dpr, dpr);
   if (samplesPerPx >= peaks.bucket) {
@@ -573,17 +569,11 @@ export function Timeline() {
       const ctx = wv.getContext('2d')!;
       const waveTop = RULER_H;
       const waveBottom = h - CHORD_H;
-      const layer = cachedLayer(
-        waveLayer,
-        `${wv.width}x${wv.height}:${st.file!.name}:${st.view.start}:${st.view.end}`,
-        wv.width,
-        wv.height,
-        (lc) => {
-          lc.fillStyle = COL.bg;
-          lc.fillRect(0, 0, wv.width, wv.height);
-          drawWaveLayer(lc, st, w, waveTop + 16, waveBottom - waveTop - 16, dpr);
-        },
-      );
+      const layer = cachedLayer(waveLayer, `${wv.width}x${wv.height}:${st.file!.name}:${st.view.start}:${st.view.end}`, wv.width, wv.height, (lc) => {
+        lc.fillStyle = COL.bg;
+        lc.fillRect(0, 0, wv.width, wv.height);
+        drawWaveLayer(lc, st, w, waveTop + 16, waveBottom - waveTop - 16, dpr);
+      });
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.drawImage(layer, 0, 0);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -652,11 +642,7 @@ export function Timeline() {
         ctx.fillStyle = COL.ruler;
         ctx.font = '12px system-ui, sans-serif';
         const msg =
-          st.analysis.status === 'running'
-            ? `Analysing pitches… ${Math.round(st.analysis.progress * 100)}%`
-            : st.analysis.status === 'error'
-              ? 'Pitch analysis failed'
-              : '';
+          st.analysis.status === 'running' ? `Analysing pitches… ${Math.round(st.analysis.progress * 100)}%` : st.analysis.status === 'error' ? 'Pitch analysis failed' : '';
         ctx.fillText(msg, GUTTER + 12, h / 2);
       }
       if (st.gridVisible) drawGrid(ctx, st, w, 0, h, false);

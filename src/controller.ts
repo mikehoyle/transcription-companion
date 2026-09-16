@@ -157,23 +157,13 @@ export function initController() {
   window.addEventListener('pagehide', flush);
   document.addEventListener('visibilitychange', onVisibility);
   const unsubscribe = store.subscribe((s, p) => {
-    if (
-      s.file &&
-      s.file === p.file &&
-      (s.playing !== p.playing || s.playStart !== p.playStart || s.view !== p.view || SESSION_KEYS.some((k) => s[k] !== p[k]))
-    ) {
+    if (s.file && s.file === p.file && (s.playing !== p.playing || s.playStart !== p.playStart || s.view !== p.view || SESSION_KEYS.some((k) => s[k] !== p[k]))) {
       scheduleLocalSave();
     }
     if (s.rate !== p.rate || s.semitones !== p.semitones || s.cents !== p.cents || s.formant !== p.formant) {
       engine.updateParams();
     }
-    if (
-      s.eq !== p.eq ||
-      s.channelMode !== p.channelMode ||
-      s.karaokeKeepBass !== p.karaokeKeepBass ||
-      s.pan !== p.pan ||
-      s.volume !== p.volume
-    ) {
+    if (s.eq !== p.eq || s.channelMode !== p.channelMode || s.karaokeKeepBass !== p.karaokeKeepBass || s.pan !== p.pan || s.volume !== p.volume) {
       engine.chain?.apply(s);
     }
     if (s.loop !== p.loop || s.loopGap !== p.loopGap || s.countIn.onLoop !== p.countIn.onLoop) {
@@ -221,8 +211,7 @@ export function seekBars(n: number) {
 
 // ------------------------------------------------------------ speed / pitch
 
-export const setRate = (rate: number) =>
-  store.set({ rate: Math.round(clamp(rate, 0.05, 4) * 1000) / 1000 });
+export const setRate = (rate: number) => store.set({ rate: Math.round(clamp(rate, 0.05, 4) * 1000) / 1000 });
 export const nudgeRate = (delta: number) => setRate(store.get().rate + delta);
 export const setSemitones = (semitones: number) => store.set({ semitones: clamp(Math.round(semitones), -24, 24) });
 export const setCents = (cents: number) => store.set({ cents: clamp(Math.round(cents), -100, 100) });
@@ -308,8 +297,7 @@ export function recallLoop(id: string) {
   zoomToRange(l.start, l.end);
 }
 
-export const renameLoop = (id: string, name: string) =>
-  store.set((s) => ({ loops: s.loops.map((l) => (l.id === id ? { ...l, name } : l)) }));
+export const renameLoop = (id: string, name: string) => store.set((s) => ({ loops: s.loops.map((l) => (l.id === id ? { ...l, name } : l)) }));
 export const deleteLoop = (id: string) => store.set((s) => ({ loops: s.loops.filter((l) => l.id !== id) }));
 
 // ------------------------------------------------------------ markers
@@ -330,8 +318,7 @@ export const cycleMarkerColor = (id: string) =>
     markers: s.markers.map((m) => (m.id === id ? { ...m, color: ((m.color ?? 0) + 1) % MARKER_COLORS.length } : m)),
   }));
 
-export const renameMarker = (id: string, label: string) =>
-  store.set((s) => ({ markers: s.markers.map((m) => (m.id === id ? { ...m, label } : m)) }));
+export const renameMarker = (id: string, label: string) => store.set((s) => ({ markers: s.markers.map((m) => (m.id === id ? { ...m, label } : m)) }));
 export const deleteMarker = (id: string) => store.set((s) => ({ markers: s.markers.filter((m) => m.id !== id) }));
 export const moveMarker = (id: string, time: number) =>
   store.set((s) => ({
@@ -346,8 +333,7 @@ export function jumpToMarker(index: number) {
 export function jumpAdjacentMarker(direction: 1 | -1) {
   const p = pos();
   const ms = store.get().markers;
-  const target =
-    direction > 0 ? ms.find((m) => m.time > p + 0.05) : [...ms].reverse().find((m) => m.time < p - 0.3);
+  const target = direction > 0 ? ms.find((m) => m.time > p + 0.05) : [...ms].reverse().find((m) => m.time < p - 0.3);
   seek(target ? target.time : direction > 0 ? duration() : 0);
 }
 
@@ -390,8 +376,7 @@ export function setDownbeatHere() {
   store.set({ tempo: { ...s.tempo, offset: ((p % beat) + beat) % beat }, gridVisible: true });
 }
 
-export const setBpm = (bpm: number) =>
-  store.set((s) => ({ tempo: { ...s.tempo, bpm: clamp(Math.round(bpm * 100) / 100, 20, 400) } }));
+export const setBpm = (bpm: number) => store.set((s) => ({ tempo: { ...s.tempo, bpm: clamp(Math.round(bpm * 100) / 100, 20, 400) } }));
 
 // ------------------------------------------------------------ view
 
@@ -544,10 +529,7 @@ function readLocalSession(f: FileInfo): { patch: Partial<AppState>; position: nu
     const patch = sessionPatch(data);
     const position = Number.isFinite(data.position) ? clamp(data.position, 0, f.duration) : 0;
     const v = data.view;
-    const view =
-      Number.isFinite(v?.start) && Number.isFinite(v?.end) && v.start >= 0 && v.end <= f.duration && v.end > v.start
-        ? { start: v.start, end: v.end }
-        : null;
+    const view = Number.isFinite(v?.start) && Number.isFinite(v?.end) && v.start >= 0 && v.end <= f.duration && v.end > v.start ? { start: v.start, end: v.end } : null;
     return { patch, position, view };
   } catch {
     return null;

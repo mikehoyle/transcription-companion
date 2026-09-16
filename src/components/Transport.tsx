@@ -90,16 +90,44 @@ export function Transport() {
       </div>
 
       <div className="transport-group right">
-        <button type="button" className={`icon-btn ${gridVisible ? 'on' : ''}`} title="Beat grid (G)" aria-label="Beat grid" aria-pressed={gridVisible} onClick={() => store.set({ gridVisible: !gridVisible })}>
+        <button
+          type="button"
+          className={`icon-btn ${gridVisible ? 'on' : ''}`}
+          title="Beat grid (G)"
+          aria-label="Beat grid"
+          aria-pressed={gridVisible}
+          onClick={() => store.set({ gridVisible: !gridVisible })}
+        >
           #
         </button>
-        <button type="button" className={`icon-btn ${showRoll ? 'on' : ''}`} title="Show pitch roll" aria-label="Show pitch roll" aria-pressed={showRoll} onClick={() => store.set({ showRoll: !showRoll })}>
+        <button
+          type="button"
+          className={`icon-btn ${showRoll ? 'on' : ''}`}
+          title="Show pitch roll"
+          aria-label="Show pitch roll"
+          aria-pressed={showRoll}
+          onClick={() => store.set({ showRoll: !showRoll })}
+        >
           <Icon name="roll" />
         </button>
-        <button type="button" className={`icon-btn ${showNotes ? 'on' : ''}`} title="Show notes & chords" aria-label="Show notes and chords" aria-pressed={showNotes} onClick={() => store.set({ showNotes: !showNotes })}>
+        <button
+          type="button"
+          className={`icon-btn ${showNotes ? 'on' : ''}`}
+          title="Show notes & chords"
+          aria-label="Show notes and chords"
+          aria-pressed={showNotes}
+          onClick={() => store.set({ showNotes: !showNotes })}
+        >
           <Icon name="notes" />
         </button>
-        <button type="button" className={`icon-btn ${follow ? 'on' : ''}`} title="Follow playhead (F)" aria-label="Follow playhead" aria-pressed={follow} onClick={() => store.set({ follow: !follow })}>
+        <button
+          type="button"
+          className={`icon-btn ${follow ? 'on' : ''}`}
+          title="Follow playhead (F)"
+          aria-label="Follow playhead"
+          aria-pressed={follow}
+          onClick={() => store.set({ follow: !follow })}
+        >
           <Icon name="follow" />
         </button>
         <button type="button" className="icon-btn" title="Zoom out (X)" aria-label="Zoom out" onClick={() => c.zoom(2)}>

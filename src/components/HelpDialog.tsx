@@ -36,19 +36,32 @@ export function HelpDialog() {
         <section>
           <h3>Getting around</h3>
           <ul>
-            <li><b>Click</b> the waveform or pitch roll to move the playhead; <b>drag</b> to select a loop.</li>
+            <li>
+              <b>Click</b> the waveform or pitch roll to move the playhead; <b>drag</b> to select a loop.
+            </li>
             <li>Drag loop edges or marker flags to adjust them; double-click a marker flag to rename it.</li>
-            <li><b>Wheel</b> scrolls the timeline, <b>Ctrl/⌘/Alt + wheel</b> zooms. Drag on the overview strip to navigate.</li>
-            <li>The <b>pitch roll</b> shows how strongly each note sounds over time — bright horizontal lines are sustained notes.</li>
-            <li>The <b>keyboard panel</b> guesses notes and chord at the playhead. Click a key to hear a reference pitch.</li>
-            <li>Tempo and key are detected automatically; correct them with <b>Tap</b> and <b>Set bar 1 here</b> in the Tempo panel.</li>
-            <li><b>Speed trainer</b>: enable a loop, set start and target speed — the speed steps up after each N repetitions.</li>
-            <li><b>Karaoke</b> mode cancels centre-panned sound (often lead vocal); try <b>Left/Right only</b> for hard-panned parts.</li>
+            <li>
+              <b>Wheel</b> scrolls the timeline, <b>Ctrl/⌘/Alt + wheel</b> zooms. Drag on the overview strip to navigate.
+            </li>
+            <li>
+              The <b>pitch roll</b> shows how strongly each note sounds over time — bright horizontal lines are sustained notes.
+            </li>
+            <li>
+              The <b>keyboard panel</b> guesses notes and chord at the playhead. Click a key to hear a reference pitch.
+            </li>
+            <li>
+              Tempo and key are detected automatically; correct them with <b>Tap</b> and <b>Set bar 1 here</b> in the Tempo panel.
+            </li>
+            <li>
+              <b>Speed trainer</b>: enable a loop, set start and target speed — the speed steps up after each N repetitions.
+            </li>
+            <li>
+              <b>Karaoke</b> mode cancels centre-panned sound (often lead vocal); try <b>Left/Right only</b> for hard-panned parts.
+            </li>
           </ul>
           <p className="muted">
-            Everything happens locally in your browser. Audio files are never uploaded anywhere. Your markers, loops and settings are
-            remembered per file in this browser, and your last file (up to 100 MB) is reopened on your next visit — use{' '}
-            <b>Save session</b> to keep them as a file you can move elsewhere.
+            Everything happens locally in your browser. Audio files are never uploaded anywhere. Your markers, loops and settings are remembered per file in this browser, and your
+            last file (up to 100 MB) is reopened on your next visit — use <b>Save session</b> to keep them as a file you can move elsewhere.
           </p>
         </section>
         <section>
@@ -59,7 +72,9 @@ export function HelpDialog() {
               <dl>
                 {SHORTCUTS.filter((s) => s.group === g).map((s) => (
                   <div key={s.keys} className="shortcut">
-                    <dt><kbd>{s.keys}</kbd></dt>
+                    <dt>
+                      <kbd>{s.keys}</kbd>
+                    </dt>
                     <dd>{s.description}</dd>
                   </div>
                 ))}

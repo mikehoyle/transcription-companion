@@ -25,8 +25,5 @@ declare module 'signalsmith-stretch' {
     setUpdateInterval(seconds: number, callback?: (inputTime: number) => void): Promise<unknown>;
   }
 
-  export default function SignalsmithStretch(
-    context: BaseAudioContext,
-    options?: AudioWorkletNodeOptions,
-  ): Promise<StretchNode>;
+  export default function SignalsmithStretch(context: BaseAudioContext, options?: AudioWorkletNodeOptions): Promise<StretchNode>;
 }

@@ -1,19 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  ANALYSIS_RATE,
-  NOTE_MIN,
-  chroma,
-  detectKey,
-  detectTempo,
-  formatChord,
-  guessChord,
-  guessNotes,
-  midiToFreq,
-  noteName,
-  pcName,
-  spectrumAt,
-  toDisplayLevels,
-} from './music';
+import { ANALYSIS_RATE, NOTE_MIN, chroma, detectKey, detectTempo, formatChord, guessChord, guessNotes, midiToFreq, noteName, pcName, spectrumAt, toDisplayLevels } from './music';
 
 /** A steady mix of sine partials at the analysis rate. */
 function tone(midis: number[], seconds = 1, harmonics = 1): Float32Array {
@@ -22,7 +8,7 @@ function tone(midis: number[], seconds = 1, harmonics = 1): Float32Array {
   for (const m of midis) {
     const f0 = midiToFreq(m);
     for (let h = 1; h <= harmonics; h++) {
-      const amp = (0.3 / midis.length) / h;
+      const amp = 0.3 / midis.length / h;
       for (let i = 0; i < n; i++) out[i] += amp * Math.sin((2 * Math.PI * f0 * h * i) / ANALYSIS_RATE);
     }
   }
@@ -167,7 +153,12 @@ describe('detectKey', () => {
   it('identifies the key of a chord progression in C major', () => {
     // I - vi - IV - V, the way an accumulated chroma vector would see it.
     const acc = new Float32Array(12);
-    for (const chord of [[0, 4, 7], [9, 0, 4], [5, 9, 0], [7, 11, 2]]) {
+    for (const chord of [
+      [0, 4, 7],
+      [9, 0, 4],
+      [5, 9, 0],
+      [7, 11, 2],
+    ]) {
       for (const pc of chord) acc[pc] += 1;
     }
     const key = detectKey(acc);
@@ -177,7 +168,12 @@ describe('detectKey', () => {
 
   it('identifies a minor key', () => {
     const acc = new Float32Array(12);
-    for (const chord of [[9, 0, 4], [2, 5, 9], [4, 8, 11], [9, 0, 4]]) {
+    for (const chord of [
+      [9, 0, 4],
+      [2, 5, 9],
+      [4, 8, 11],
+      [9, 0, 4],
+    ]) {
       for (const pc of chord) acc[pc] += 1;
     }
     const key = detectKey(acc);

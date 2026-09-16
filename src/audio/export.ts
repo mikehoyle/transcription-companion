@@ -31,7 +31,10 @@ export async function renderProcessed(buffer: AudioBuffer, state: AppState, star
   for (let c = 0; c < Math.min(2, buffer.numberOfChannels); c++) chans.push(buffer.getChannelData(c).slice(from, to));
   if (chans.length === 1) chans.push(chans[0].slice());
   const offsetSec = from / sr;
-  await stretch.addBuffers(chans, chans.map((c) => c.buffer));
+  await stretch.addBuffers(
+    chans,
+    chans.map((c) => c.buffer),
+  );
 
   // A single schedule() call: the node drops any change timed at/after its
   // current time when a new one is scheduled, so we don't schedule a stop —

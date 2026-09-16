@@ -38,20 +38,38 @@ export function LoopPanel() {
               onChange={(v) => (edge === 'start' ? c.setLoop(v, loop.end, loop.enabled) : c.setLoop(loop.start, v, true))}
             />
             <div className="nudges">
-              <button type="button" className="chip tiny" onClick={() => c.nudgeLoop(edge, -0.1)} disabled={!hasLoop} aria-label={`Move loop ${edge} 0.1 s earlier`}>−.1</button>
-              <button type="button" className="chip tiny" onClick={() => c.nudgeLoop(edge, -0.01)} disabled={!hasLoop} aria-label={`Move loop ${edge} 0.01 s earlier`}>−.01</button>
-              <button type="button" className="chip tiny" onClick={() => c.nudgeLoop(edge, 0.01)} disabled={!hasLoop} aria-label={`Move loop ${edge} 0.01 s later`}>+.01</button>
-              <button type="button" className="chip tiny" onClick={() => c.nudgeLoop(edge, 0.1)} disabled={!hasLoop} aria-label={`Move loop ${edge} 0.1 s later`}>+.1</button>
+              <button type="button" className="chip tiny" onClick={() => c.nudgeLoop(edge, -0.1)} disabled={!hasLoop} aria-label={`Move loop ${edge} 0.1 s earlier`}>
+                −.1
+              </button>
+              <button type="button" className="chip tiny" onClick={() => c.nudgeLoop(edge, -0.01)} disabled={!hasLoop} aria-label={`Move loop ${edge} 0.01 s earlier`}>
+                −.01
+              </button>
+              <button type="button" className="chip tiny" onClick={() => c.nudgeLoop(edge, 0.01)} disabled={!hasLoop} aria-label={`Move loop ${edge} 0.01 s later`}>
+                +.01
+              </button>
+              <button type="button" className="chip tiny" onClick={() => c.nudgeLoop(edge, 0.1)} disabled={!hasLoop} aria-label={`Move loop ${edge} 0.1 s later`}>
+                +.1
+              </button>
             </div>
           </div>
         ))}
       </div>
       <div className="preset-row">
-        <button type="button" className="chip small" disabled={!hasLoop} onClick={() => c.shiftLoop(-1)} title="Previous phrase (Shift+[)">◀ Prev</button>
-        <button type="button" className="chip small" disabled={!hasLoop} onClick={() => c.scaleLoop(0.5)} title="Halve loop length">÷2</button>
-        <button type="button" className="chip small" disabled={!hasLoop} onClick={() => c.scaleLoop(2)} title="Double loop length">×2</button>
-        <button type="button" className="chip small" disabled={!hasLoop} onClick={() => c.shiftLoop(1)} title="Next phrase (Shift+])">Next ▶</button>
-        <button type="button" className="chip small" disabled={!hasLoop} onClick={() => c.zoomToRange(loop.start, loop.end)} title="Zoom to loop">Zoom</button>
+        <button type="button" className="chip small" disabled={!hasLoop} onClick={() => c.shiftLoop(-1)} title="Previous phrase (Shift+[)">
+          ◀ Prev
+        </button>
+        <button type="button" className="chip small" disabled={!hasLoop} onClick={() => c.scaleLoop(0.5)} title="Halve loop length">
+          ÷2
+        </button>
+        <button type="button" className="chip small" disabled={!hasLoop} onClick={() => c.scaleLoop(2)} title="Double loop length">
+          ×2
+        </button>
+        <button type="button" className="chip small" disabled={!hasLoop} onClick={() => c.shiftLoop(1)} title="Next phrase (Shift+])">
+          Next ▶
+        </button>
+        <button type="button" className="chip small" disabled={!hasLoop} onClick={() => c.zoomToRange(loop.start, loop.end)} title="Zoom to loop">
+          Zoom
+        </button>
         {hasLoop && <span className="hint">{(loop.end - loop.start).toFixed(2)} s</span>}
       </div>
 
