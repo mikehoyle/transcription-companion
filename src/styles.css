@@ -292,6 +292,17 @@ input[type='range'] { width: 100%; accent-color: var(--accent); min-width: 60px;
   padding: 10px 12px 10px 16px; border-radius: 10px; display: flex; gap: 10px; align-items: center;
 }
 .toast.notice { background: var(--surface-3); border-color: var(--border); color: var(--text); box-shadow: 0 6px 20px rgba(0,0,0,0.35); }
+.crash { min-height: 100vh; display: grid; place-items: center; padding: 24px; }
+.crash-card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 28px 32px; width: min(620px, 100%); }
+.crash-card h1 { margin: 0 0 10px; font-size: 22px; }
+.crash-card p { margin: 0 0 12px; color: var(--muted); line-height: 1.5; }
+.crash-message { font-family: var(--mono); font-size: 13px; color: #ffd9dc; background: #3a1a1d; border: 1px solid #6b2a30; border-radius: 8px; padding: 10px 12px; overflow-wrap: anywhere; }
+.crash-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0 14px; }
+.crash-actions .btn { text-decoration: none; color: inherit; }
+.crash-hint { font-size: 12px; }
+.crash-details summary { cursor: pointer; color: var(--muted); font-size: 12px; }
+.crash-details pre { max-height: 240px; overflow: auto; background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 10px; font-size: 11px; line-height: 1.45; }
+
 .drag-overlay {
   position: fixed; inset: 10px; border: 3px dashed var(--accent); border-radius: 18px;
   background: rgba(245,165,36,0.08); display: grid; place-items: center;
