@@ -18,7 +18,16 @@ describe('fmtTime', () => {
   it('formats minutes and seconds', () => {
     expect(fmtTime(0)).toBe('0:00.00');
     expect(fmtTime(83.456)).toBe('1:23.46');
-    expect(fmtTime(59.999)).toBe('0:60.00'); // rounds within the minute rather than rolling over
+  });
+
+  it('rolls over instead of showing a full minute of seconds', () => {
+    expect(fmtTime(59.999)).toBe('1:00.00');
+    expect(fmtTime(59.996, 2)).toBe('1:00.00');
+    expect(fmtTime(59.994, 2)).toBe('0:59.99');
+    expect(fmtTime(59.6, 0)).toBe('1:00');
+    expect(fmtTime(119.999)).toBe('2:00.00');
+    expect(fmtTime(3599.999)).toBe('1:00:00.00');
+    expect(fmtTime(-59.999)).toBe('-1:00.00');
   });
 
   it('shows hours only when there are any', () => {

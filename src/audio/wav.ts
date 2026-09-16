@@ -27,7 +27,9 @@ export function encodeWav(channels: Float32Array[], sampleRate: number): Blob {
   for (let i = 0; i < length; i++) {
     for (let c = 0; c < numCh; c++) {
       const v = Math.max(-1, Math.min(1, channels[c][i]));
-      out[i * numCh + c] = v < 0 ? v * 0x8000 : v * 0x7fff;
+      // Rounded, not truncated: storing into an Int16Array truncates towards
+      // zero, which costs up to a whole LSB on every sample.
+      out[i * numCh + c] = Math.round(v < 0 ? v * 0x8000 : v * 0x7fff);
     }
   }
   return new Blob([buffer], { type: 'audio/wav' });
