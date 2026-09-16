@@ -15,6 +15,7 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
       - run: npm ci
+      - run: npm test
       # Runs the whole pipeline: copies & splits the ffmpeg core, type-checks,
       # builds (including the welcome-screen prerender) and checks every output
       # file against Cloudflare Pages' size limits.
