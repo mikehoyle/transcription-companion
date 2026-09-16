@@ -91,18 +91,25 @@ export function createChain(ctx: BaseAudioContext): ProcessingChain {
     input,
     output: volume,
     filters,
+    // Settings are validated on the way in (see session.ts), but a mismatch here
+    // would take the whole graph down mid-playback, so fall back rather than throw.
     apply(s, immediate = false) {
-      const m = MATRIX[s.channelMode];
+      const m = MATRIX[s.channelMode] ?? MATRIX.stereo;
       gains.forEach((g, i) => set(g.gain, m[i], immediate));
       set(bassGain.gain, s.channelMode === 'karaoke' && s.karaokeKeepBass ? 1 : 0, immediate);
 
       const eq = s.eq;
       set(hp.frequency, eq.enabled && eq.hpOn ? eq.hpFreq : 1, immediate);
       set(lp.frequency, eq.enabled && eq.lpOn ? Math.min(eq.lpFreq, nyquist) : nyquist, immediate);
-      eq.bands.forEach((b, i) => {
-        set(bands[i].frequency, b.freq, immediate);
-        set(bands[i].Q, b.q, immediate);
-        set(bands[i].gain, eq.enabled ? b.gain : 0, immediate);
+      // Driven by the filters that exist, not by the band list: a peaking filter
+      // at 0 dB is transparent whatever else it is set to, so a band with no
+      // filter is dropped and a filter with no band goes flat.
+      bands.forEach((filter, i) => {
+        const b = eq.bands[i];
+        if (!b) return set(filter.gain, 0, immediate);
+        set(filter.frequency, b.freq, immediate);
+        set(filter.Q, b.q, immediate);
+        set(filter.gain, eq.enabled ? b.gain : 0, immediate);
       });
       set(panner.pan, s.pan, immediate);
       set(volume.gain, s.volume, immediate);

@@ -132,11 +132,11 @@ describe('channel matrix', () => {
     expect(apply({ channelMode: 'stereo', karaokeKeepBass: true }).bassGain.gain.value).toBe(0);
   });
 
-  // MATRIX has no entry for anything else, and `m[i]` would throw. session.ts is
-  // what keeps an unknown mode from ever reaching here; if that guard is ever
-  // moved into the chain, this expectation is the one to update.
-  it('assumes the channel mode has already been validated', () => {
-    expect(() => chain.apply(state({ channelMode: 'sideways' as ChannelMode }))).toThrow();
+  // session.ts keeps an unknown mode from getting this far; this is the backstop,
+  // because throwing here would kill the graph in the middle of playback.
+  it('falls back to stereo for a mode it does not know', () => {
+    const { matrix } = apply({ channelMode: 'sideways' as ChannelMode });
+    expect(matrix.map((g) => g.gain.value)).toEqual(expected.stereo);
   });
 });
 
@@ -182,10 +182,23 @@ describe('EQ', () => {
     expect(lp.frequency.value).toBe(NYQUIST);
   });
 
-  it('assumes the band count matches the filters it built', () => {
-    // Same contract as the channel mode: session.ts guarantees it.
-    const eq = eqWith({ bands: [...DEFAULT_EQ.bands, { freq: 15000, gain: 0, q: 1 }] });
-    expect(() => chain.apply(state({ eq }))).toThrow();
+  it('ignores a band with no filter to put it on', () => {
+    const eq = eqWith({ bands: [...DEFAULT_EQ.bands, { freq: 15000, gain: 12, q: 1 }] });
+    const { bands } = apply({ eq });
+    expect(bands).toHaveLength(DEFAULT_EQ.bands.length);
+    expect(bands.map((f) => f.frequency.value)).toEqual(DEFAULT_EQ.bands.map((b) => b.freq));
+  });
+
+  it('flattens a filter with no band to drive it', () => {
+    // Anything but flat here would apply EQ the user can no longer see or change.
+    const { bands } = apply({ eq: eqWith({ bands: DEFAULT_EQ.bands.slice(0, 2).map((b) => ({ ...b, gain: 6 })) }) });
+    expect(bands.map((f) => f.gain.value)).toEqual([6, 6, 0, 0, 0, 0]);
+  });
+
+  it('keeps working after the band list shrinks mid-session', () => {
+    apply({ eq: eqWith({ bands: DEFAULT_EQ.bands.map((b) => ({ ...b, gain: 9 })) }) });
+    const { bands } = apply({ eq: eqWith({ bands: DEFAULT_EQ.bands.slice(0, 3) }) });
+    expect(bands.map((f) => f.gain.value)).toEqual([0, 0, 0, 0, 0, 0]);
   });
 });
 
