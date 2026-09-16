@@ -159,7 +159,15 @@ function EqCurve() {
     };
   }, []);
 
-  return <canvas ref={ref} className="eq-canvas" title="Drag the numbered points to boost/cut; scroll over a point to change its width (Q)" />;
+  return (
+    <canvas
+      ref={ref}
+      className="eq-canvas"
+      role="img"
+      aria-label="Equaliser response curve, 20 Hz to 20 kHz. The numbered points are the bands below; drag one to boost or cut, scroll over it to change its width."
+      title="Drag the numbered points to boost/cut; scroll over a point to change its width (Q)"
+    />
+  );
 }
 
 export function SoundPanel() {
@@ -182,6 +190,7 @@ export function SoundPanel() {
               if (preset) store.set({ eq: preset(store.get().eq) });
             }}
             title="EQ presets for isolating instruments"
+            aria-label="EQ preset"
           >
             <option value="">EQ preset…</option>
             {Object.keys(EQ_PRESETS).map((k) => (
@@ -197,7 +206,7 @@ export function SoundPanel() {
       }
     >
       <div className="field-row wrap">
-        <Segmented value={channelMode} options={CHANNELS} onChange={(v) => store.set({ channelMode: v })} />
+        <Segmented value={channelMode} options={CHANNELS} onChange={(v) => store.set({ channelMode: v })} ariaLabel="Channels" />
         {channelMode === 'karaoke' && (
           <Toggle checked={keepBass} onChange={(v) => store.set({ karaokeKeepBass: v })} title="Add back low frequencies removed by centre cancellation">
             Keep bass
@@ -211,9 +220,9 @@ export function SoundPanel() {
         {eq.bands.map((b, i) => (
           <div key={i} className="eq-band">
             <span className="band-num">{i + 1}</span>
-            <Slider label="Gain" value={b.gain} min={-24} max={24} step={0.5} defaultValue={0} onChange={(v) => setBand(i, { gain: v })} format={(v) => `${v > 0 ? '+' : ''}${v.toFixed(1)} dB`} />
-            <Slider label="Freq" value={b.freq} min={20} max={20000} step={1} scale="log" onChange={(v) => setBand(i, { freq: v })} format={(v) => `${fmtFreq(v)} Hz`} />
-            <Slider label="Q" value={b.q} min={0.2} max={12} step={0.05} defaultValue={0.9} onChange={(v) => setBand(i, { q: v })} format={(v) => v.toFixed(2)} />
+            <Slider label="Gain" ariaLabel={`Band ${i + 1} gain`} value={b.gain} min={-24} max={24} step={0.5} defaultValue={0} onChange={(v) => setBand(i, { gain: v })} format={(v) => `${v > 0 ? '+' : ''}${v.toFixed(1)} dB`} />
+            <Slider label="Freq" ariaLabel={`Band ${i + 1} frequency`} value={b.freq} min={20} max={20000} step={1} scale="log" onChange={(v) => setBand(i, { freq: v })} format={(v) => `${fmtFreq(v)} Hz`} />
+            <Slider label="Q" ariaLabel={`Band ${i + 1} width (Q)`} value={b.q} min={0.2} max={12} step={0.05} defaultValue={0.9} onChange={(v) => setBand(i, { q: v })} format={(v) => v.toFixed(2)} />
           </div>
         ))}
       </div>
@@ -221,11 +230,11 @@ export function SoundPanel() {
       <div className="field-row wrap">
         <div className="filter-ctl">
           <Toggle checked={eq.hpOn} onChange={(v) => setEq({ hpOn: v, enabled: true })}>High-pass</Toggle>
-          <Slider label="" value={eq.hpFreq} min={20} max={5000} step={1} scale="log" disabled={!eq.hpOn} onChange={(v) => setEq({ hpFreq: v })} format={(v) => `${fmtFreq(v)} Hz`} />
+          <Slider label="" ariaLabel="High-pass frequency" value={eq.hpFreq} min={20} max={5000} step={1} scale="log" disabled={!eq.hpOn} onChange={(v) => setEq({ hpFreq: v })} format={(v) => `${fmtFreq(v)} Hz`} />
         </div>
         <div className="filter-ctl">
           <Toggle checked={eq.lpOn} onChange={(v) => setEq({ lpOn: v, enabled: true })}>Low-pass</Toggle>
-          <Slider label="" value={eq.lpFreq} min={200} max={20000} step={1} scale="log" disabled={!eq.lpOn} onChange={(v) => setEq({ lpFreq: v })} format={(v) => `${fmtFreq(v)} Hz`} />
+          <Slider label="" ariaLabel="Low-pass frequency" value={eq.lpFreq} min={200} max={20000} step={1} scale="log" disabled={!eq.lpOn} onChange={(v) => setEq({ lpFreq: v })} format={(v) => `${fmtFreq(v)} Hz`} />
         </div>
       </div>
 

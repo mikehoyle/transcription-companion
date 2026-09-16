@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useId, useRef } from 'react';
 import { SHORTCUTS } from '../shortcuts';
 import { store, useStore } from '../store';
 import { Icon } from './Icon';
@@ -6,6 +6,7 @@ import { Icon } from './Icon';
 export function HelpDialog() {
   const open = useStore((s) => s.helpOpen);
   const ref = useRef<HTMLDialogElement>(null);
+  const titleId = useId();
 
   useEffect(() => {
     const d = ref.current;
@@ -17,10 +18,16 @@ export function HelpDialog() {
   const groups = [...new Set(SHORTCUTS.map((s) => s.group))];
 
   return (
-    <dialog ref={ref} className="help" onClose={() => store.set({ helpOpen: false })} onClick={(e) => e.target === ref.current && store.set({ helpOpen: false })}>
+    <dialog
+      ref={ref}
+      className="help"
+      aria-labelledby={titleId}
+      onClose={() => store.set({ helpOpen: false })}
+      onClick={(e) => e.target === ref.current && store.set({ helpOpen: false })}
+    >
       <header>
-        <h2>Learn By Ear — help</h2>
-        <button className="icon-btn" onClick={() => store.set({ helpOpen: false })} title="Close (Esc)">
+        <h2 id={titleId}>Learn By Ear — help</h2>
+        <button className="icon-btn" onClick={() => store.set({ helpOpen: false })} title="Close (Esc)" aria-label="Close help">
           <Icon name="close" />
         </button>
       </header>

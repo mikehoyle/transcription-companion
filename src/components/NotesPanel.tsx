@@ -185,6 +185,7 @@ export function NotesPanel() {
           <select
             value={transposeDisplay}
             title="Display note names for a transposing instrument"
+            aria-label="Display note names for a transposing instrument"
             onChange={(e) => store.set({ transposeDisplay: Number(e.target.value) })}
           >
             {TRANSPOSITIONS.map((t) => (
@@ -215,6 +216,8 @@ export function NotesPanel() {
       <canvas
         ref={canvasRef}
         className="spectrum-canvas"
+        role="img"
+        aria-label="Pitch spectrum at the playhead, drawn over a piano keyboard: bar height is how strongly each note sounds and orange marks the guessed notes, which are listed above. Click a key to hear a reference tone."
         onPointerDown={playNote}
         title="Pitch spectrum at the playhead. Orange = guessed notes. Click a key to hear a reference tone."
       />

@@ -480,6 +480,8 @@ function renderRollLayer(ctx: CanvasRenderingContext2D, s: AppState, w: number, 
 export function Timeline() {
   const hasFile = useStore((s) => s.file !== null);
   const showRoll = useStore((s) => s.showRoll);
+  const duration = useStore((s) => s.file?.duration ?? 0);
+  const markerCount = useStore((s) => s.markers.length);
   const overviewRef = useRef<HTMLCanvasElement>(null);
   const waveRef = useRef<HTMLCanvasElement>(null);
   const rollRef = useRef<HTMLCanvasElement>(null);
@@ -660,11 +662,33 @@ export function Timeline() {
   });
 
   if (!hasFile) return null;
+  // The canvases are the app's main output but have no DOM of their own, so each one
+  // describes what it draws. The descriptions deliberately leave out the playhead and
+  // visible window, which change many times a second; AnalysisStatus announces the
+  // things worth hearing about (key, tempo, the chord under a stopped playhead).
   return (
-    <div className="timeline">
-      <canvas ref={overviewRef} className="tl-overview" />
-      <canvas ref={waveRef} className="tl-wave" />
-      {showRoll && <canvas ref={rollRef} className="tl-roll" title="Pitch roll: brightness shows how strongly each note sounds over time" />}
+    <div className="timeline" role="group" aria-label="Timeline">
+      <canvas
+        ref={overviewRef}
+        className="tl-overview"
+        role="img"
+        aria-label={`Overview of the whole recording, ${fmtTime(duration, 0)} long, with the visible window highlighted. Drag to move it.`}
+      />
+      <canvas
+        ref={waveRef}
+        className="tl-wave"
+        role="img"
+        aria-label={`Waveform with time ruler, loop region, detected chords and ${markerCount === 1 ? '1 marker' : `${markerCount} markers`}. Click to move the playhead, drag to select a loop.`}
+      />
+      {showRoll && (
+        <canvas
+          ref={rollRef}
+          className="tl-roll"
+          role="img"
+          aria-label="Pitch roll: brightness shows how strongly each note sounds over time, on a piano keyboard from low notes at the bottom."
+          title="Pitch roll: brightness shows how strongly each note sounds over time"
+        />
+      )}
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { installShortcuts } from './shortcuts';
 import { forgetRecentFile, loadRecentFile, RECENT_FILE_MAX_BYTES } from './recentFile';
 import { store, useStore } from './store';
 import { fmtBytes, fmtTime } from './util';
+import { AnalysisStatus } from './components/AnalysisStatus';
 import { HelpDialog } from './components/HelpDialog';
 import { Icon } from './components/Icon';
 import { LoopPanel } from './components/LoopPanel';
@@ -106,7 +107,7 @@ function Header() {
         >
           <Icon name="bug" size={20} />
         </a>
-        <button className="icon-btn" onClick={() => store.set({ helpOpen: true })} title="Help & shortcuts (?)">
+        <button className="icon-btn" onClick={() => store.set({ helpOpen: true })} title="Help & shortcuts (?)" aria-label="Help and keyboard shortcuts">
           <Icon name="help" size={20} />
         </button>
       </div>
@@ -118,7 +119,20 @@ function Welcome() {
   const input = useRef<HTMLInputElement>(null);
   return (
     <main className="welcome">
-      <div className="drop-card" onClick={() => input.current?.click()} role="button" tabIndex={0}>
+      <div
+        className="drop-card"
+        onClick={() => input.current?.click()}
+        onKeyDown={(e) => {
+          // role="button" promises Enter/Space activation; a plain <div> doesn't give it.
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            input.current?.click();
+          }
+        }}
+        role="button"
+        tabIndex={0}
+        aria-label="Choose an audio or video file to open"
+      >
         <div className="drop-icon">
           <Icon name="open" size={40} />
         </div>
@@ -164,7 +178,7 @@ function Overlays() {
   return (
     <>
       {loading && (
-        <div className="loading-overlay">
+        <div className="loading-overlay" role="status" aria-live="polite">
           <div className="loading-card">
             <div className="spinner" />
             <p>{loading.message}</p>
@@ -180,7 +194,7 @@ function Overlays() {
         {notice && (
           <div className="toast notice" role="status">
             <span>{notice}</span>
-            <button className="icon-btn small" onClick={() => store.set({ notice: null })}>
+            <button className="icon-btn small" onClick={() => store.set({ notice: null })} aria-label="Dismiss message">
               <Icon name="close" size={14} />
             </button>
           </div>
@@ -188,7 +202,7 @@ function Overlays() {
         {error && (
           <div className="toast" role="alert">
             <span>{error}</span>
-            <button className="icon-btn small" onClick={() => store.set({ error: null })}>
+            <button className="icon-btn small" onClick={() => store.set({ error: null })} aria-label="Dismiss error">
               <Icon name="close" size={14} />
             </button>
           </div>
@@ -253,6 +267,7 @@ export default function App() {
       <Header />
       {hasFile ? (
         <main className="workspace">
+          <AnalysisStatus />
           <div className="sticky-top">
             <Transport />
             <Timeline />

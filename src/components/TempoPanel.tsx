@@ -17,14 +17,14 @@ export function TempoPanel() {
     <Panel title="Tempo & metronome">
       <div className="tempo-top">
         <div className="bpm-box">
-          <NumberField value={tempo.bpm} min={20} max={400} step={0.5} onChange={c.setBpm} width="4.5em" format={(v) => v.toFixed(1)} />
+          <NumberField value={tempo.bpm} min={20} max={400} step={0.5} onChange={c.setBpm} width="4.5em" format={(v) => v.toFixed(1)} ariaLabel="Tempo in BPM" />
           <span className="field-label">BPM</span>
         </div>
         <button className="chip tap-btn" onClick={c.tapTempo} title="Tap along with the beat (T)">
           Tap
         </button>
-        <button className="chip small" onClick={() => c.setBpm(tempo.bpm / 2)} title="Half tempo">½</button>
-        <button className="chip small" onClick={() => c.setBpm(tempo.bpm * 2)} title="Double tempo">×2</button>
+        <button className="chip small" onClick={() => c.setBpm(tempo.bpm / 2)} title="Half tempo" aria-label="Half tempo">½</button>
+        <button className="chip small" onClick={() => c.setBpm(tempo.bpm * 2)} title="Double tempo" aria-label="Double tempo">×2</button>
         {tempo.detectedBpm !== null && Math.abs(tempo.detectedBpm - tempo.bpm) > 0.05 && (
           <button className="link-btn" onClick={() => c.setBpm(tempo.detectedBpm!)} title="Restore detected tempo">
             detected {tempo.detectedBpm}
@@ -35,7 +35,7 @@ export function TempoPanel() {
 
       <div className="field-row wrap">
         <span className="field-label">Beats per bar</span>
-        <Segmented value={tempo.beatsPerBar} options={[2, 3, 4, 5, 6, 7].map((n) => ({ value: n, label: String(n) }))} onChange={(v) => setTempo({ beatsPerBar: v })} />
+        <Segmented value={tempo.beatsPerBar} options={[2, 3, 4, 5, 6, 7].map((n) => ({ value: n, label: String(n) }))} onChange={(v) => setTempo({ beatsPerBar: v })} ariaLabel="Beats per bar" />
       </div>
 
       <div className="field-row wrap">
@@ -43,8 +43,8 @@ export function TempoPanel() {
           Set bar 1 here
         </button>
         <span className="field-label">Grid offset</span>
-        <button className="chip tiny" onClick={() => setTempo({ offset: tempo.offset - 0.01 })}>−10ms</button>
-        <button className="chip tiny" onClick={() => setTempo({ offset: tempo.offset + 0.01 })}>+10ms</button>
+        <button className="chip tiny" onClick={() => setTempo({ offset: tempo.offset - 0.01 })} aria-label="Move the beat grid 10 ms earlier">−10ms</button>
+        <button className="chip tiny" onClick={() => setTempo({ offset: tempo.offset + 0.01 })} aria-label="Move the beat grid 10 ms later">+10ms</button>
       </div>
 
       <div className="field-row wrap">
@@ -61,13 +61,13 @@ export function TempoPanel() {
             {metronome.on ? 'On' : 'Off'}
           </Toggle>
         </div>
-        <Slider label="Click volume" value={metronome.volume * 100} min={0} max={100} step={1} onChange={(v) => store.set({ metronome: { ...metronome, volume: v / 100 } })} format={(v) => `${Math.round(v)}%`} />
+        <Slider label="Click volume" ariaLabel="Metronome click volume" value={metronome.volume * 100} min={0} max={100} step={1} onChange={(v) => store.set({ metronome: { ...metronome, volume: v / 100 } })} format={(v) => `${Math.round(v)}%`} />
       </div>
 
       <div className="subsection">
         <div className="subsection-head">
           <h3>Count-in</h3>
-          <Segmented value={countIn.bars} options={[1, 2].map((n) => ({ value: n, label: `${n} bar${n > 1 ? 's' : ''}` }))} onChange={(v) => setCountIn({ bars: v })} />
+          <Segmented value={countIn.bars} options={[1, 2].map((n) => ({ value: n, label: `${n} bar${n > 1 ? 's' : ''}` }))} onChange={(v) => setCountIn({ bars: v })} ariaLabel="Count-in length" />
         </div>
         <div className="field-row wrap">
           <Toggle checked={countIn.onPlay} onChange={(v) => setCountIn({ onPlay: v })}>Before playing</Toggle>
