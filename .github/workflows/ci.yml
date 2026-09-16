@@ -1,0 +1,21 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      # Runs the whole pipeline: copies & splits the ffmpeg core, type-checks,
+      # builds (including the welcome-screen prerender) and checks every output
+      # file against Cloudflare Pages' size limits.
+      - run: npm run build

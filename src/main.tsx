@@ -1,6 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot, hydrateRoot } from 'react-dom/client';
 import App from './App';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { engine } from './audio/engine';
 import * as controller from './controller';
 import { store } from './store';
@@ -12,9 +13,13 @@ if (import.meta.env.DEV) {
 }
 
 const root = document.getElementById('root')!;
+// The boundary renders its children untouched until something throws, so it adds no
+// markup and the prerendered welcome screen still hydrates cleanly.
 const app = (
   <StrictMode>
-    <App />
+    <ErrorBoundary>
+      <App />
+    </ErrorBoundary>
   </StrictMode>
 );
 

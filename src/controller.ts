@@ -5,7 +5,8 @@ import type { AnalysisMessage } from './audio/analysis.worker';
 import { renderProcessed } from './audio/export';
 import { downloadBlob } from './audio/wav';
 import { DEFAULT_EQ, initialState, MARKER_COLORS, store, uid, type AppState, type FileInfo } from './store';
-import { saveRecentFile } from './recentFile';
+import { forgetRecentFile, saveRecentFile } from './recentFile';
+import { sessionPatch, SESSION_KEYS } from './session';
 import { clamp } from './util';
 
 // ------------------------------------------------------------ heavy data
@@ -494,12 +495,6 @@ export async function exportAudio(region: 'loop' | 'all') {
   }
 }
 
-const SESSION_KEYS = [
-  'rate', 'semitones', 'cents', 'formant', 'volume', 'pan', 'channelMode', 'karaokeKeepBass', 'eq',
-  'loop', 'loopGap', 'countIn', 'trainer', 'markers', 'loops', 'tempo', 'gridVisible', 'snapToGrid',
-  'metronome', 'transposeDisplay',
-] as const satisfies readonly (keyof AppState)[];
-
 export function saveSession() {
   const s = store.get();
   if (!s.file) return;
@@ -509,20 +504,12 @@ export function saveSession() {
   downloadBlob(blob, `${s.file.name.replace(/\.[^.]+$/, '')}.tcsession.json`);
 }
 
-function sessionPatch(data: Record<string, unknown>): Partial<AppState> {
-  const patch: Partial<AppState> = {};
-  const defaults = initialState();
-  for (const k of SESSION_KEYS) {
-    if (k in data && typeof data[k] === typeof defaults[k]) (patch as Record<string, unknown>)[k] = data[k];
-  }
-  return patch;
-}
-
 export async function loadSession(file: File) {
   try {
     const data = JSON.parse(await file.text());
     if (data?.app !== 'transcription-companion') throw new Error('Not a Learn By Ear session file.');
     const patch = sessionPatch(data);
+    if (Object.keys(patch).length === 0) throw new Error('It contains no settings this version understands.');
     if (patch.tempo) userTempo = true;
     store.set(patch);
     const s = store.get();
@@ -545,6 +532,8 @@ const LOCAL_SAVE_DELAY = 400;
 const localKey = (f: FileInfo) => `${LOCAL_PREFIX}${JSON.stringify([f.name, f.size, Math.round(f.duration * 1000)])}`;
 
 let saveTimer: ReturnType<typeof setTimeout> | null = null;
+/** Set once the session has been discarded for recovery, so nothing writes it back. */
+let autosaveDisabled = false;
 
 function readLocalSession(f: FileInfo): { patch: Partial<AppState>; position: number; view: AppState['view'] | null } | null {
   try {
@@ -553,7 +542,6 @@ function readLocalSession(f: FileInfo): { patch: Partial<AppState>; position: nu
     const data = JSON.parse(raw);
     if (data?.app !== 'transcription-companion') return null;
     const patch = sessionPatch(data);
-    if (patch.trainer) patch.trainer = { ...patch.trainer, rep: 0 };
     const position = Number.isFinite(data.position) ? clamp(data.position, 0, f.duration) : 0;
     const v = data.view;
     const view =
@@ -567,6 +555,7 @@ function readLocalSession(f: FileInfo): { patch: Partial<AppState>; position: nu
 }
 
 function scheduleLocalSave() {
+  if (autosaveDisabled) return;
   if (saveTimer) clearTimeout(saveTimer);
   saveTimer = setTimeout(saveLocalSessionNow, LOCAL_SAVE_DELAY);
 }
@@ -575,7 +564,7 @@ function saveLocalSessionNow() {
   if (saveTimer) clearTimeout(saveTimer);
   saveTimer = null;
   const s = store.get();
-  if (!s.file) return;
+  if (!s.file || autosaveDisabled) return;
   const data: Record<string, unknown> = {
     app: 'transcription-companion',
     version: 1,
@@ -617,4 +606,25 @@ function pruneLocalSessions(keep: string, max: number) {
   }
   entries.sort((a, b) => b.savedAt - a.savedAt);
   for (const { key } of entries.slice(Math.max(0, max - 1))) localStorage.removeItem(key);
+}
+
+/**
+ * Recovery path for the error boundary: throw away everything that would be restored on
+ * the next visit, so a state that crashes the app can't come straight back. Autosaving is
+ * switched off for the rest of the page's life — the crashed UI must not write it again
+ * (`initController` also flushes on pagehide, i.e. during the reload that follows).
+ */
+export async function clearRestoreState() {
+  autosaveDisabled = true;
+  if (saveTimer) clearTimeout(saveTimer);
+  saveTimer = null;
+  const file = store.get().file;
+  if (file) {
+    try {
+      localStorage.removeItem(localKey(file));
+    } catch (e) {
+      console.warn('Could not clear the saved session', e);
+    }
+  }
+  await forgetRecentFile();
 }
