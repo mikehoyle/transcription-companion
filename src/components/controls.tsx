@@ -32,11 +32,11 @@ interface SliderProps {
 
 export function Slider({ label, value, min, max, step, onChange, format, defaultValue, disabled, scale = 'linear', title, ariaLabel }: SliderProps) {
   const toPos = (v: number) => (scale === 'log' ? (Math.log(v / min) / Math.log(max / min)) * 1000 : v);
-  const fromPos = (p: number) => (scale === 'log' ? min * Math.pow(max / min, p / 1000) : p);
+  const fromPos = (p: number) => (scale === 'log' ? min * (max / min) ** (p / 1000) : p);
   // Reserve room for the widest end-of-range label so the track doesn't resize (and shift under the pointer) as the value text changes.
   const valueWidth = format ? Math.max(format(min).length, format(max).length) : Math.max(String(min).length, String(max).length);
   // On a log scale the input's own value is a position, not the value, so spell the value out.
-  const valueText = (format && format(value)) || (scale === 'log' ? String(value) : '');
+  const valueText = (format?.(value)) || (scale === 'log' ? String(value) : '');
   return (
     <label className={`slider ${disabled ? 'disabled' : ''}`} title={title}>
       <span className="slider-label">{label}</span>
@@ -70,7 +70,7 @@ export function NumberField({
   min,
   max,
   format = (v) => String(v),
-  parse = (t) => (t.trim() === '' || isNaN(Number(t)) ? null : Number(t)),
+  parse = (t) => (t.trim() === '' || Number.isNaN(Number(t)) ? null : Number(t)),
   width = '5em',
   title,
   suffix,
@@ -164,6 +164,7 @@ export function Segmented<T extends string | number>({
   return (
     <div className="segmented" role="radiogroup" title={title} aria-label={ariaLabel}>
       {options.map((o) => (
+        // biome-ignore lint/a11y/useSemanticElements: real radio inputs can't be styled as this segmented control
         <button
           key={String(o.value)}
           type="button"

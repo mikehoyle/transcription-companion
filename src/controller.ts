@@ -241,7 +241,7 @@ export const resetSpeedPitch = () => store.set({ rate: 1, semitones: 0, cents: 0
 
 export function setLoop(start: number, end: number, enabled = true) {
   const d = duration();
-  let a = clamp(Math.min(start, end), 0, d);
+  const a = clamp(Math.min(start, end), 0, d);
   let b = clamp(Math.max(start, end), 0, d);
   if (b - a < 0.02) b = Math.min(d, a + 0.02);
   store.set((s) => ({ loop: { enabled, start: a, end: b }, trainer: { ...s.trainer, rep: 0 } }));
@@ -398,8 +398,8 @@ export const setBpm = (bpm: number) =>
 export function setView(start: number, end: number) {
   const d = duration();
   if (d <= 0) return;
-  let w = clamp(end - start, Math.min(0.05, d), d);
-  let a = clamp(start, 0, d - w);
+  const w = clamp(end - start, Math.min(0.05, d), d);
+  const a = clamp(start, 0, d - w);
   store.set({ view: { start: a, end: a + w } });
 }
 
@@ -487,7 +487,7 @@ export async function exportAudio(region: 'loop' | 'all') {
     ]
       .filter(Boolean)
       .join('_');
-    downloadBlob(blob, `${base}${tag ? '_' + tag : ''}.wav`);
+    downloadBlob(blob, `${base}${tag ? `_${tag}` : ''}.wav`);
     store.set({ loading: null });
   } catch (e) {
     console.error(e);

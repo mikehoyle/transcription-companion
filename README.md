@@ -40,6 +40,15 @@ npm run test:watch # re-run them as you edit
 ```
 
 ```bash
+npm run lint       # Biome: lint rules + formatting check
+npm run lint:fix   # apply the fixes it can make
+```
+
+Biome (`biome.jsonc`) covers both linting and formatting. The React rules are on — `useExhaustiveDependencies`
+matters most here, since the canvas components are effect-heavy — and the few deliberate deviations carry a
+`biome-ignore` comment saying why. CSS formatting is off: `styles.css` is written one rule per line on purpose.
+
+```bash
 npm run build      # type-check + static build into dist/
 npm run preview    # serve dist/ with the production Content-Security-Policy
 ```

@@ -20,13 +20,13 @@ export function TempoPanel() {
           <NumberField value={tempo.bpm} min={20} max={400} step={0.5} onChange={c.setBpm} width="4.5em" format={(v) => v.toFixed(1)} ariaLabel="Tempo in BPM" />
           <span className="field-label">BPM</span>
         </div>
-        <button className="chip tap-btn" onClick={c.tapTempo} title="Tap along with the beat (T)">
+        <button type="button" className="chip tap-btn" onClick={c.tapTempo} title="Tap along with the beat (T)">
           Tap
         </button>
-        <button className="chip small" onClick={() => c.setBpm(tempo.bpm / 2)} title="Half tempo" aria-label="Half tempo">½</button>
-        <button className="chip small" onClick={() => c.setBpm(tempo.bpm * 2)} title="Double tempo" aria-label="Double tempo">×2</button>
+        <button type="button" className="chip small" onClick={() => c.setBpm(tempo.bpm / 2)} title="Half tempo" aria-label="Half tempo">½</button>
+        <button type="button" className="chip small" onClick={() => c.setBpm(tempo.bpm * 2)} title="Double tempo" aria-label="Double tempo">×2</button>
         {tempo.detectedBpm !== null && Math.abs(tempo.detectedBpm - tempo.bpm) > 0.05 && (
-          <button className="link-btn" onClick={() => c.setBpm(tempo.detectedBpm!)} title="Restore detected tempo">
+          <button type="button" className="link-btn" onClick={() => c.setBpm(tempo.detectedBpm!)} title="Restore detected tempo">
             detected {tempo.detectedBpm}
           </button>
         )}
@@ -39,12 +39,12 @@ export function TempoPanel() {
       </div>
 
       <div className="field-row wrap">
-        <button className="chip small" onClick={c.setDownbeatHere} title="Align bar 1 with the playhead (B)">
+        <button type="button" className="chip small" onClick={c.setDownbeatHere} title="Align bar 1 with the playhead (B)">
           Set bar 1 here
         </button>
         <span className="field-label">Grid offset</span>
-        <button className="chip tiny" onClick={() => setTempo({ offset: tempo.offset - 0.01 })} aria-label="Move the beat grid 10 ms earlier">−10ms</button>
-        <button className="chip tiny" onClick={() => setTempo({ offset: tempo.offset + 0.01 })} aria-label="Move the beat grid 10 ms later">+10ms</button>
+        <button type="button" className="chip tiny" onClick={() => setTempo({ offset: tempo.offset - 0.01 })} aria-label="Move the beat grid 10 ms earlier">−10ms</button>
+        <button type="button" className="chip tiny" onClick={() => setTempo({ offset: tempo.offset + 0.01 })} aria-label="Move the beat grid 10 ms later">+10ms</button>
       </div>
 
       <div className="field-row wrap">

@@ -256,7 +256,7 @@ input[type='range'] { width: 100%; accent-color: var(--accent); min-width: 60px;
 /* tempo panel */
 .tempo-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .bpm-box { display: flex; align-items: baseline; gap: 4px; }
-.bpm-box input { font-size: 20px !important; font-weight: 600; }
+.bpm-box .numfield input { font-size: 20px; font-weight: 600; }
 .tap-btn { padding: 8px 18px; font-weight: 600; }
 .key-name { font-weight: 700; color: var(--accent); }
 

@@ -14,13 +14,13 @@ export function fmtTime(sec: number, decimals = 2): string {
   const s = sec % 60;
   const ss = s.toFixed(decimals).padStart(decimals > 0 ? 3 + decimals : 2, '0');
   const body = h > 0 ? `${h}:${String(m).padStart(2, '0')}:${ss}` : `${m}:${ss}`;
-  return neg ? '-' + body : body;
+  return neg ? `-${body}` : body;
 }
 
 /** Parses "1:23.4", "83.4", "1:02:03" into seconds, or null. */
 export function parseTime(text: string): number | null {
   const parts = text.trim().split(':').map((p) => p.trim());
-  if (parts.some((p) => p === '' || isNaN(Number(p)))) return null;
+  if (parts.some((p) => p === '' || Number.isNaN(Number(p)))) return null;
   return parts.reduce((acc, p) => acc * 60 + Number(p), 0);
 }
 

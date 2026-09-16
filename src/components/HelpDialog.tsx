@@ -18,6 +18,7 @@ export function HelpDialog() {
   const groups = [...new Set(SHORTCUTS.map((s) => s.group))];
 
   return (
+    // biome-ignore lint/a11y/useKeyWithClickEvents: clicking the backdrop is a shortcut for the close button; Esc already closes the dialog
     <dialog
       ref={ref}
       className="help"
@@ -27,7 +28,7 @@ export function HelpDialog() {
     >
       <header>
         <h2 id={titleId}>Learn By Ear — help</h2>
-        <button className="icon-btn" onClick={() => store.set({ helpOpen: false })} title="Close (Esc)" aria-label="Close help">
+        <button type="button" className="icon-btn" onClick={() => store.set({ helpOpen: false })} title="Close (Esc)" aria-label="Close help">
           <Icon name="close" />
         </button>
       </header>

@@ -38,20 +38,20 @@ export function LoopPanel() {
               onChange={(v) => (edge === 'start' ? c.setLoop(v, loop.end, loop.enabled) : c.setLoop(loop.start, v, true))}
             />
             <div className="nudges">
-              <button className="chip tiny" onClick={() => c.nudgeLoop(edge, -0.1)} disabled={!hasLoop} aria-label={`Move loop ${edge} 0.1 s earlier`}>−.1</button>
-              <button className="chip tiny" onClick={() => c.nudgeLoop(edge, -0.01)} disabled={!hasLoop} aria-label={`Move loop ${edge} 0.01 s earlier`}>−.01</button>
-              <button className="chip tiny" onClick={() => c.nudgeLoop(edge, 0.01)} disabled={!hasLoop} aria-label={`Move loop ${edge} 0.01 s later`}>+.01</button>
-              <button className="chip tiny" onClick={() => c.nudgeLoop(edge, 0.1)} disabled={!hasLoop} aria-label={`Move loop ${edge} 0.1 s later`}>+.1</button>
+              <button type="button" className="chip tiny" onClick={() => c.nudgeLoop(edge, -0.1)} disabled={!hasLoop} aria-label={`Move loop ${edge} 0.1 s earlier`}>−.1</button>
+              <button type="button" className="chip tiny" onClick={() => c.nudgeLoop(edge, -0.01)} disabled={!hasLoop} aria-label={`Move loop ${edge} 0.01 s earlier`}>−.01</button>
+              <button type="button" className="chip tiny" onClick={() => c.nudgeLoop(edge, 0.01)} disabled={!hasLoop} aria-label={`Move loop ${edge} 0.01 s later`}>+.01</button>
+              <button type="button" className="chip tiny" onClick={() => c.nudgeLoop(edge, 0.1)} disabled={!hasLoop} aria-label={`Move loop ${edge} 0.1 s later`}>+.1</button>
             </div>
           </div>
         ))}
       </div>
       <div className="preset-row">
-        <button className="chip small" disabled={!hasLoop} onClick={() => c.shiftLoop(-1)} title="Previous phrase (Shift+[)">◀ Prev</button>
-        <button className="chip small" disabled={!hasLoop} onClick={() => c.scaleLoop(0.5)} title="Halve loop length">÷2</button>
-        <button className="chip small" disabled={!hasLoop} onClick={() => c.scaleLoop(2)} title="Double loop length">×2</button>
-        <button className="chip small" disabled={!hasLoop} onClick={() => c.shiftLoop(1)} title="Next phrase (Shift+])">Next ▶</button>
-        <button className="chip small" disabled={!hasLoop} onClick={() => c.zoomToRange(loop.start, loop.end)} title="Zoom to loop">Zoom</button>
+        <button type="button" className="chip small" disabled={!hasLoop} onClick={() => c.shiftLoop(-1)} title="Previous phrase (Shift+[)">◀ Prev</button>
+        <button type="button" className="chip small" disabled={!hasLoop} onClick={() => c.scaleLoop(0.5)} title="Halve loop length">÷2</button>
+        <button type="button" className="chip small" disabled={!hasLoop} onClick={() => c.scaleLoop(2)} title="Double loop length">×2</button>
+        <button type="button" className="chip small" disabled={!hasLoop} onClick={() => c.shiftLoop(1)} title="Next phrase (Shift+])">Next ▶</button>
+        <button type="button" className="chip small" disabled={!hasLoop} onClick={() => c.zoomToRange(loop.start, loop.end)} title="Zoom to loop">Zoom</button>
         {hasLoop && <span className="hint">{(loop.end - loop.start).toFixed(2)} s</span>}
       </div>
 
@@ -108,7 +108,7 @@ export function LoopPanel() {
       <div className="subsection">
         <div className="subsection-head">
           <h3>Saved loops</h3>
-          <button className="chip small" disabled={!hasLoop} onClick={c.saveCurrentLoop} title="Save current loop (S)">
+          <button type="button" className="chip small" disabled={!hasLoop} onClick={c.saveCurrentLoop} title="Save current loop (S)">
             + Save current
           </button>
         </div>
@@ -120,14 +120,14 @@ export function LoopPanel() {
               const active = Math.abs(l.start - loop.start) < 1e-3 && Math.abs(l.end - loop.end) < 1e-3;
               return (
                 <li key={l.id} className={active ? 'active' : ''}>
-                  <button className="chip tiny" onClick={() => c.recallLoop(l.id)} title="Loop this region" aria-label={`Loop the saved region “${l.name}”`}>
+                  <button type="button" className="chip tiny" onClick={() => c.recallLoop(l.id)} title="Loop this region" aria-label={`Loop the saved region “${l.name}”`}>
                     <Icon name="loop" size={12} />
                   </button>
                   <input className="inline-edit" value={l.name} aria-label="Saved loop name" onChange={(e) => c.renameLoop(l.id, e.target.value)} />
-                  <button className="time-link" onClick={() => engine.seek(l.start)} aria-label={`Jump to the start of “${l.name}”`}>
+                  <button type="button" className="time-link" onClick={() => engine.seek(l.start)} aria-label={`Jump to the start of “${l.name}”`}>
                     {fmtTime(l.start, 1)}–{fmtTime(l.end, 1)}
                   </button>
-                  <button className="icon-btn small" onClick={() => c.deleteLoop(l.id)} title="Delete" aria-label={`Delete the saved loop “${l.name}”`}>
+                  <button type="button" className="icon-btn small" onClick={() => c.deleteLoop(l.id)} title="Delete" aria-label={`Delete the saved loop “${l.name}”`}>
                     <Icon name="trash" size={14} />
                   </button>
                 </li>

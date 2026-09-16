@@ -7,7 +7,7 @@ export const NOTE_MIN = 24;
 export const NOTE_MAX = 108;
 export const NOTE_COUNT = NOTE_MAX - NOTE_MIN + 1;
 
-export const midiToFreq = (m: number) => 440 * Math.pow(2, (m - 69) / 12);
+export const midiToFreq = (m: number) => 440 * 2 ** ((m - 69) / 12);
 export const pcName = (pc: number) => NOTE_NAMES[((pc % 12) + 12) % 12];
 export const noteName = (midi: number) => `${pcName(midi)}${Math.floor(midi / 12) - 1}`;
 
@@ -70,7 +70,7 @@ export function guessNotes(spec: Float32Array, maxNotes = 6, thresholdDb = -18):
   let max = 0;
   for (const v of s) if (v > max) max = v;
   if (max < 1e-4) return [];
-  const threshold = max * Math.pow(10, thresholdDb / 20);
+  const threshold = max * 10 ** (thresholdDb / 20);
   const notes: number[] = [];
   for (let iter = 0; iter < maxNotes; iter++) {
     let best = -1;
@@ -141,7 +141,7 @@ export interface ChordGuess {
 }
 
 export function formatChord(c: { root: number; suffix: string; bass: number | null }, transpose = 0): string {
-  return pcName(c.root + transpose) + c.suffix + (c.bass !== null ? '/' + pcName(c.bass + transpose) : '');
+  return pcName(c.root + transpose) + c.suffix + (c.bass !== null ? `/${pcName(c.bass + transpose)}` : '');
 }
 
 /**
@@ -233,7 +233,7 @@ export function detectTempo(env: Float32Array, hopSec: number): { bpm: number; o
   let bestScore = -Infinity;
   for (let lag = minLag; lag <= maxLag; lag++) {
     const bpm = 60 / (lag * hopSec);
-    const w = Math.exp(-0.5 * Math.pow(Math.log2(bpm / 120) / 0.9, 2));
+    const w = Math.exp(-0.5 * (Math.log2(bpm / 120) / 0.9) ** 2);
     // reward lags whose double also correlates (metrical consistency)
     const dbl = lag * 2 <= maxLag + 1 ? ac[lag * 2] : 0;
     const score = (ac[lag] + 0.5 * Math.max(0, dbl)) * w;

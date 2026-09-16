@@ -22,16 +22,17 @@ const setEq = (patch: Partial<EqState>) => store.set((s) => ({ eq: { ...s.eq, ..
 const setBand = (i: number, patch: Partial<EqState['bands'][number]>) =>
   store.set((s) => ({ eq: { ...s.eq, bands: s.eq.bands.map((b, j) => (j === i ? { ...b, ...patch } : b)) } }));
 
+/** Maps between frequency/gain and canvas coordinates: log x, linear dB y. */
+const layout = (w: number, h: number) => ({
+  x: (f: number) => (Math.log(f / F_MIN) / Math.log(F_MAX / F_MIN)) * w,
+  f: (x: number) => F_MIN * (F_MAX / F_MIN) ** clamp(x / w, 0, 1),
+  y: (db: number) => h / 2 - (db / G_RANGE) * (h / 2 - 8),
+  db: (y: number) => ((h / 2 - y) / (h / 2 - 8)) * G_RANGE,
+});
+
 function EqCurve() {
   const ref = useRef<HTMLCanvasElement>(null);
   const drag = useRef<number | null>(null);
-
-  const layout = (w: number, h: number) => ({
-    x: (f: number) => (Math.log(f / F_MIN) / Math.log(F_MAX / F_MIN)) * w,
-    f: (x: number) => F_MIN * Math.pow(F_MAX / F_MIN, clamp(x / w, 0, 1)),
-    y: (db: number) => h / 2 - (db / G_RANGE) * (h / 2 - 8),
-    db: (y: number) => ((h / 2 - y) / (h / 2 - 8)) * G_RANGE,
-  });
 
   useAnimationFrame(() => {
     const canvas = ref.current;
@@ -66,7 +67,7 @@ function EqCurve() {
 
     const n = Math.max(64, Math.floor(w / 2));
     const freqs = new Float32Array(n);
-    for (let i = 0; i < n; i++) freqs[i] = F_MIN * Math.pow(F_MAX / F_MIN, i / (n - 1));
+    for (let i = 0; i < n; i++) freqs[i] = F_MIN * (F_MAX / F_MIN) ** (i / (n - 1));
     const total = new Float32Array(n).fill(1);
     const mag = new Float32Array(n);
     const phase = new Float32Array(n);
@@ -218,6 +219,7 @@ export function SoundPanel() {
 
       <div className="eq-bands">
         {eq.bands.map((b, i) => (
+          // biome-ignore lint/suspicious/noArrayIndexKey: the six bands are a fixed list, never reordered or removed
           <div key={i} className="eq-band">
             <span className="band-num">{i + 1}</span>
             <Slider label="Gain" ariaLabel={`Band ${i + 1} gain`} value={b.gain} min={-24} max={24} step={0.5} defaultValue={0} onChange={(v) => setBand(i, { gain: v })} format={(v) => `${v > 0 ? '+' : ''}${v.toFixed(1)} dB`} />

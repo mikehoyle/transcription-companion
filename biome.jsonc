@@ -1,0 +1,55 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.5.14/schema.json",
+  "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
+  "files": {
+    // package-lock.json is npm's to format, public/ffmpeg is copied in by a build
+    // script, and the favicon is a decorative standalone image (no <title> wanted).
+    "includes": ["**", "!package-lock.json", "!public/ffmpeg", "!public/favicon.svg"]
+  },
+  "formatter": {
+    "enabled": true,
+    "useEditorconfig": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    // Wide, to stay close to how this codebase is already written by hand.
+    "lineWidth": 180
+  },
+  "css": {
+    // styles.css is deliberately one declaration block per line; reformatting it
+    // would triple its length for no gain. It is still linted.
+    "formatter": { "enabled": false }
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single",
+      "jsxQuoteStyle": "double",
+      "semicolons": "always",
+      "trailingCommas": "all",
+      "arrowParentheses": "always"
+    }
+  },
+  "linter": {
+    "enabled": true,
+    // Enables the React rules, useExhaustiveDependencies above all: the canvas
+    // components are effect-heavy and the store is read through useSyncExternalStore.
+    "domains": { "react": "recommended" },
+    "rules": {
+      "preset": "recommended",
+      "a11y": {
+        // These wrap the input in a component, so the <label> still ends up around it.
+        "noLabelWithoutControl": {
+          "level": "error",
+          "options": { "inputComponents": ["NumberField", "Slider", "Toggle", "Segmented"] }
+        }
+      },
+      "style": {
+        // `canvas.getContext('2d')!` and friends: the alternative is noise at 45 sites.
+        "noNonNullAssertion": "off"
+      }
+    }
+  },
+  "assist": {
+    // Import order here is hand-maintained (React, then libraries, then local).
+    "actions": { "source": { "organizeImports": "off" } }
+  }
+}

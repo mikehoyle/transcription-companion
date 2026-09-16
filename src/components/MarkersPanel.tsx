@@ -11,7 +11,7 @@ export function MarkersPanel() {
     <Panel
       title="Markers"
       actions={
-        <button className="chip small" onClick={() => c.addMarker()} title="Add marker (M)">+ Marker</button>
+        <button type="button" className="chip small" onClick={() => c.addMarker()} title="Add marker (M)">+ Marker</button>
       }
     >
       {markers.length === 0 ? (
@@ -22,7 +22,7 @@ export function MarkersPanel() {
         <ul className="item-list markers">
           {markers.map((m, i) => (
             <li key={m.id}>
-              <button
+              <button type="button"
                 className="marker-swatch"
                 style={{ background: markerColor(m) }}
                 onClick={() => c.cycleMarkerColor(m.id)}
@@ -30,14 +30,14 @@ export function MarkersPanel() {
                 aria-label={`Change colour of marker at ${fmtTime(m.time)}`}
               />
               <span className="marker-index">{i < 9 ? i + 1 : ''}</span>
-              <button className="time-link" onClick={() => c.seek(m.time)} title="Jump here" aria-label={`Jump to marker at ${fmtTime(m.time)}`}>
+              <button type="button" className="time-link" onClick={() => c.seek(m.time)} title="Jump here" aria-label={`Jump to marker at ${fmtTime(m.time)}`}>
                 {fmtTime(m.time)}
               </button>
               <input className="inline-edit" value={m.label} placeholder="Add label…" aria-label={`Label for marker at ${fmtTime(m.time)}`} onChange={(e) => c.renameMarker(m.id, e.target.value)} />
-              <button className="chip tiny" onClick={() => c.loopFromMarker(m.id)} title="Loop from here to the next marker" aria-label="Loop from here to the next marker">
+              <button type="button" className="chip tiny" onClick={() => c.loopFromMarker(m.id)} title="Loop from here to the next marker" aria-label="Loop from here to the next marker">
                 <Icon name="loop" size={12} />
               </button>
-              <button className="icon-btn small" onClick={() => c.deleteMarker(m.id)} title="Delete" aria-label="Delete marker">
+              <button type="button" className="icon-btn small" onClick={() => c.deleteMarker(m.id)} title="Delete" aria-label="Delete marker">
                 <Icon name="trash" size={14} />
               </button>
             </li>
@@ -45,7 +45,7 @@ export function MarkersPanel() {
         </ul>
       )}
       {markers.length > 0 && (
-        <button className="link-btn danger" onClick={() => window.confirm('Remove all markers?') && store.set({ markers: [] })}>
+        <button type="button" className="link-btn danger" onClick={() => window.confirm('Remove all markers?') && store.set({ markers: [] })}>
           Clear all
         </button>
       )}

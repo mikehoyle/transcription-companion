@@ -20,9 +20,9 @@ const OUTPUTS = [
 ];
 
 const banner = (template) =>
-  ['# Generated from ' + template + ' by scripts/gen-headers.mjs — do not edit.', '# Change the policy in config/csp.mjs, then run `npm run headers`.', ''].join('\n');
+  [`# Generated from ${template} by scripts/gen-headers.mjs — do not edit.`, '# Change the policy in config/csp.mjs, then run `npm run headers`.', ''].join('\n');
 
-let stale = [];
+const stale = [];
 for (const { template, output } of OUTPUTS) {
   const wanted = banner(template) + readFileSync(join(root, template), 'utf8').replaceAll('{{CSP}}', CSP);
   let current = null;

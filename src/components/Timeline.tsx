@@ -73,6 +73,9 @@ type Drag =
 
 /** `mounted` must change whenever the canvas is conditionally rendered, so listeners get (re)attached. */
 function useTimelinePointer(ref: RefObject<HTMLCanvasElement | null>, hover: { current: number | null }, markerZone: boolean, mounted = true) {
+  // `mounted` is what reattaches the listeners when a conditionally rendered canvas
+  // appears; the rule treats this custom hook's parameter as an outer-scope value.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: see above
   useEffect(() => {
     const canvas = ref.current;
     if (!canvas) return;
@@ -274,7 +277,7 @@ function drawGrid(ctx: CanvasRenderingContext2D, s: AppState, w: number, top: nu
   if (beatPx * bpb < 4) return;
   const k0 = Math.floor((s.view.start - s.tempo.offset) / beat);
   const k1 = Math.ceil((s.view.end - s.tempo.offset) / beat);
-  const barEvery = Math.max(1, Math.pow(2, Math.ceil(Math.log2(28 / (beatPx * bpb)))));
+  const barEvery = Math.max(1, 2 ** Math.ceil(Math.log2(28 / (beatPx * bpb))));
   ctx.font = '10px ui-monospace, SFMono-Regular, Menlo, monospace';
   for (let k = k0; k <= k1; k++) {
     const t = s.tempo.offset + k * beat;
@@ -493,7 +496,9 @@ export function Timeline() {
   useTimelinePointer(waveRef, hover, true);
   useTimelinePointer(rollRef, hover, false, showRoll);
 
-  // overview: click/drag to move the visible window
+  // overview: click/drag to move the visible window.
+  // Re-runs on `hasFile` because there is no canvas to attach to until a file is open.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: see above
   useEffect(() => {
     const canvas = overviewRef.current;
     if (!canvas) return;
@@ -667,7 +672,7 @@ export function Timeline() {
   // visible window, which change many times a second; AnalysisStatus announces the
   // things worth hearing about (key, tempo, the chord under a stopped playhead).
   return (
-    <div className="timeline" role="group" aria-label="Timeline">
+    <section className="timeline" aria-label="Timeline">
       <canvas
         ref={overviewRef}
         className="tl-overview"
@@ -689,6 +694,6 @@ export function Timeline() {
           title="Pitch roll: brightness shows how strongly each note sounds over time"
         />
       )}
-    </div>
+    </section>
   );
 }

@@ -47,10 +47,10 @@ export class ErrorBoundary extends Component<Props, State> {
           </p>
           <p className="crash-message">{error.message || String(error)}</p>
           <div className="crash-actions">
-            <button className="btn primary" onClick={() => location.reload()}>
+            <button type="button" className="btn primary" onClick={() => location.reload()}>
               Reload
             </button>
-            <button className="btn" onClick={() => void this.reset()}>
+            <button type="button" className="btn" onClick={() => void this.reset()}>
               Reset saved data &amp; reload
             </button>
             <a className="btn" href="https://github.com/mikehoyle/transcription-companion/issues/new/choose" target="_blank" rel="noopener noreferrer">
