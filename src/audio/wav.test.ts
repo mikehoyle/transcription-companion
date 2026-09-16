@@ -48,11 +48,20 @@ describe('encodeWav', () => {
   it('converts floats to 16-bit PCM without clipping the full-scale values', async () => {
     const v = await read(encodeWav([Float32Array.from([0, 0.5, -0.5, 1, -1])], 8000));
     expect(v.getInt16(44, true)).toBe(0);
-    // Storing into an Int16Array truncates, so 0.5 lands one LSB (-90 dBFS) low.
-    expect(v.getInt16(46, true)).toBe(Math.trunc(0.5 * 32767));
+    expect(v.getInt16(46, true)).toBe(Math.round(0.5 * 32767));
     expect(v.getInt16(48, true)).toBe(-16384);
     expect(v.getInt16(50, true)).toBe(32767);
     expect(v.getInt16(52, true)).toBe(-32768);
+  });
+
+  it('rounds to the nearest step rather than towards zero', async () => {
+    // Truncating would bias every sample towards silence by up to one LSB.
+    const scale = 32767;
+    const v = await read(encodeWav([Float32Array.from([0.5, 1.4 / scale, 0.6 / scale, -1.4 / scale])], 8000));
+    expect(v.getInt16(44, true)).toBe(16384); // 16383.5 rounds up
+    expect(v.getInt16(46, true)).toBe(1);
+    expect(v.getInt16(48, true)).toBe(1);
+    expect(v.getInt16(50, true)).toBe(-1);
   });
 
   it('clamps samples that overshoot instead of wrapping around', async () => {

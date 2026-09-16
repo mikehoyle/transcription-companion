@@ -5,6 +5,10 @@ export function fmtTime(sec: number, decimals = 2): string {
   if (!Number.isFinite(sec)) sec = 0;
   const neg = sec < 0;
   sec = Math.abs(sec);
+  // Round to the precision actually shown before splitting it up, so 59.999 s
+  // reads as 1:00.00 instead of 0:60.00.
+  const unit = 10 ** decimals;
+  sec = Math.round(sec * unit) / unit;
   const h = Math.floor(sec / 3600);
   const m = Math.floor((sec % 3600) / 60);
   const s = sec % 60;
