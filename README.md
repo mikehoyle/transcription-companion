@@ -27,11 +27,16 @@ exported on your machine, and nothing is uploaded or persisted. The container on
 
 ## Running locally
 
-Requires Node 20+.
+Requires Node 22.12+ (see `.nvmrc`).
 
 ```bash
 npm install
 npm run dev        # http://localhost:5173
+```
+
+```bash
+npm test           # run the unit tests once
+npm run test:watch # re-run them as you edit
 ```
 
 ```bash
@@ -69,6 +74,12 @@ npm run build
 npx wrangler pages dev dist
 ```
 
+## Licence
+
+[MIT](LICENSE). Note that the bundled dependencies keep their own licences — in particular the
+ffmpeg.wasm core in `public/ffmpeg/` ships under the terms of the `@ffmpeg/core` package
+(LGPL/GPL, depending on the build), and `signalsmith-stretch` under its own.
+
 ## Docker
 
 ```bash
@@ -97,7 +108,13 @@ src/
   prerender.tsx        build-time render of the welcome screen into index.html (for SEO / link previews)
   store.ts             tiny external store used with useSyncExternalStore
   shortcuts.ts         keyboard shortcuts
+  *.test.ts            unit tests, run with `npm test` (Vitest)
 ```
+
+The tests cover the parts where a mistake is silent rather than loud: the FFT (against a
+naive DFT), note/chord/key/tempo detection on synthesised audio, the analysis worker
+end-to-end over a known progression, session validation, the WAV encoder and the
+view/loop/marker logic in the controller.
 
 Note on the stretch node: `schedule()` replaces every change timed at or after the node's current time, so the engine
 keeps at most one future change pending and queues the second half of stop→resume pairs (loop gaps, count-ins) until the
