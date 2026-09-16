@@ -11,8 +11,9 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "headers": "node scripts/gen-headers.mjs",
     "predev": "node scripts/copy-ffmpeg.mjs",
-    "prebuild": "node scripts/copy-ffmpeg.mjs",
+    "prebuild": "node scripts/copy-ffmpeg.mjs && node scripts/gen-headers.mjs",
     "postbuild": "node scripts/check-asset-sizes.mjs"
   },
   "dependencies": {

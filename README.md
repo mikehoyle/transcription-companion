@@ -48,6 +48,13 @@ npm run preview    # serve dist/ with the production Content-Security-Policy
 splitting the ~32 MB wasm binary into 10 MiB parts (static hosts cap file size; the browser reassembles them on first
 use). `npm run build` finishes by checking every output file against Cloudflare Pages' limits.
 
+## Content-Security-Policy
+
+The policy lives in one place, `config/csp.mjs`. `npm run headers` (also run by `prebuild`) expands it into the two
+committed files that actually serve it — `nginx.conf` for Docker and `public/_headers` for Cloudflare Pages — from the
+templates in `config/`. `vite.config.ts` imports the same constant so `npm run preview` applies it too. CI runs
+`npm run headers -- --check` and fails if the generated files are stale, so edit `config/csp.mjs`, never the outputs.
+
 ## Deploying to Cloudflare Pages
 
 The repo is ready for Cloudflare Pages' Git integration:
@@ -55,7 +62,7 @@ The repo is ready for Cloudflare Pages' Git integration:
 - `wrangler.toml` — Pages project config (`name`, `pages_build_output_dir = "./dist"`). With this file present, those
   fields are read-only in the dashboard.
 - `public/_headers` — Content-Security-Policy, security headers and long-lived caching for hashed/versioned assets
-  (copied into `dist/` by the build).
+  (copied into `dist/` by the build). Generated — see "Content-Security-Policy" below.
 - `.nvmrc` — pins Node 22 for the Pages build image.
 
 One-time setup in the Cloudflare dashboard:
