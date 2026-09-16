@@ -41,16 +41,13 @@ export class ErrorBoundary extends Component<Props, State> {
       <div className="crash" role="alert">
         <div className="crash-card">
           <h1>Something went wrong</h1>
-          <p>
-            The app hit an unexpected error{file ? <> while working on “{file}”</> : null}. Nothing was uploaded, and
-            your file on disk is untouched.
-          </p>
+          <p>The app hit an unexpected error{file ? <> while working on “{file}”</> : null}. Nothing was uploaded, and your file on disk is untouched.</p>
           <p className="crash-message">{error.message || String(error)}</p>
           <div className="crash-actions">
-            <button className="btn primary" onClick={() => location.reload()}>
+            <button type="button" className="btn primary" onClick={() => location.reload()}>
               Reload
             </button>
-            <button className="btn" onClick={() => void this.reset()}>
+            <button type="button" className="btn" onClick={() => void this.reset()}>
               Reset saved data &amp; reload
             </button>
             <a className="btn" href="https://github.com/mikehoyle/transcription-companion/issues/new/choose" target="_blank" rel="noopener noreferrer">
@@ -58,8 +55,7 @@ export class ErrorBoundary extends Component<Props, State> {
             </a>
           </div>
           <p className="crash-hint">
-            Reload keeps your markers, loops and settings. Reset discards the saved session for this file and the
-            remembered file itself — use it if reloading lands you back here.
+            Reload keeps your markers, loops and settings. Reset discards the saved session for this file and the remembered file itself — use it if reloading lands you back here.
           </p>
           {(error.stack || info) && (
             <details className="crash-details">

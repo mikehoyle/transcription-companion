@@ -4,8 +4,7 @@ import { forgetRecentFile, loadRecentFile, RECENT_FILE_MAX_BYTES, saveRecentFile
 
 const BYTES = new Uint8Array([0x52, 0x49, 0x46, 0x46, 1, 2, 3, 4]);
 
-const makeFile = (name = 'song.wav', bytes = BYTES) =>
-  new File([bytes], name, { type: 'audio/wav', lastModified: 1_700_000_000_000 });
+const makeFile = (name = 'song.wav', bytes = BYTES) => new File([bytes], name, { type: 'audio/wav', lastModified: 1_700_000_000_000 });
 
 /** A file that claims to be huge without allocating it. */
 const oversized = (name = 'huge.wav') => {

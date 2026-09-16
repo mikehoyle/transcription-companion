@@ -100,7 +100,10 @@ export class AudioEngine {
     const channels: Float32Array[] = [];
     for (let c = 0; c < Math.min(2, buffer.numberOfChannels); c++) channels.push(buffer.getChannelData(c).slice());
     if (channels.length === 1) channels.push(channels[0].slice());
-    await stretch.addBuffers(channels, channels.map((ch) => ch.buffer));
+    await stretch.addBuffers(
+      channels,
+      channels.map((ch) => ch.buffer),
+    );
     this.buffer = buffer;
     this.segs = [this.makeSeg({ output: this.ctx!.currentTime - PAST })];
     this.push({ active: false, input: 0, output: this.ctx!.currentTime });

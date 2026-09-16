@@ -2,8 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { encodeWav } from './wav';
 
 const read = async (blob: Blob) => new DataView(await blob.arrayBuffer());
-const str = (v: DataView, off: number, len: number) =>
-  String.fromCharCode(...Array.from({ length: len }, (_, i) => v.getUint8(off + i)));
+const str = (v: DataView, off: number, len: number) => String.fromCharCode(...Array.from({ length: len }, (_, i) => v.getUint8(off + i)));
 
 describe('encodeWav', () => {
   it('writes a RIFF/WAVE header describing the data that follows', async () => {

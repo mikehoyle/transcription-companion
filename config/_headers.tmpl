@@ -1,0 +1,15 @@
+/*
+  Content-Security-Policy: {{CSP}}
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
+
+# Keep the *.pages.dev hostname out of search results; learnbyear.com is canonical.
+# (Preview deployments already get noindex from Cloudflare.)
+https://:project.pages.dev/*
+  X-Robots-Tag: noindex
+
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/ffmpeg/:version/*
+  Cache-Control: public, max-age=31536000, immutable

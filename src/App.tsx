@@ -5,6 +5,7 @@ import { installShortcuts } from './shortcuts';
 import { forgetRecentFile, loadRecentFile, RECENT_FILE_MAX_BYTES } from './recentFile';
 import { store, useStore } from './store';
 import { fmtBytes, fmtTime } from './util';
+import { AnalysisStatus } from './components/AnalysisStatus';
 import { HelpDialog } from './components/HelpDialog';
 import { Icon } from './components/Icon';
 import { LoopPanel } from './components/LoopPanel';
@@ -48,10 +49,19 @@ function Header() {
           <span className="brand-subtitle">Transcription Companion</span>
         </span>
       </div>
-      <button className="btn primary" onClick={() => fileInput.current?.click()}>
+      <button type="button" className="btn primary" onClick={() => fileInput.current?.click()}>
         <Icon name="open" size={16} /> Open audio / video
       </button>
-      <input ref={fileInput} type="file" accept={ACCEPT} hidden onChange={(e) => (handleFiles(e.target.files), (e.target.value = ''))} />
+      <input
+        ref={fileInput}
+        type="file"
+        accept={ACCEPT}
+        hidden
+        onChange={(e) => {
+          handleFiles(e.target.files);
+          e.target.value = ''; // so re-picking the same file fires change again
+        }}
+      />
       {file && (
         <div className="file-info" title={file.name}>
           <span className="file-name">{file.name}</span>
@@ -68,19 +78,33 @@ function Header() {
               <summary className="btn">
                 <Icon name="download" size={16} /> Export
               </summary>
+              {/* biome-ignore lint/a11y/noStaticElementInteractions: closing the menu is incidental to activating one of the buttons inside it */}
+              {/* biome-ignore lint/a11y/useKeyWithClickEvents: activating those buttons from the keyboard fires a click that bubbles here too */}
               <div className="menu-items" onClick={(e) => (e.currentTarget.parentElement as HTMLDetailsElement).removeAttribute('open')}>
-                <button disabled={!hasLoop} onClick={() => c.exportAudio('loop')}>Loop region as WAV (with speed/pitch/EQ)</button>
-                <button onClick={() => c.exportAudio('all')}>Whole file as WAV (with speed/pitch/EQ)</button>
+                <button type="button" disabled={!hasLoop} onClick={() => c.exportAudio('loop')}>
+                  Loop region as WAV (with speed/pitch/EQ)
+                </button>
+                <button type="button" onClick={() => c.exportAudio('all')}>
+                  Whole file as WAV (with speed/pitch/EQ)
+                </button>
               </div>
             </details>
             <details className="menu">
               <summary className="btn">
                 <Icon name="save" size={16} /> Session
               </summary>
+              {/* biome-ignore lint/a11y/noStaticElementInteractions: closing the menu is incidental to activating one of the buttons inside it */}
+              {/* biome-ignore lint/a11y/useKeyWithClickEvents: activating those buttons from the keyboard fires a click that bubbles here too */}
               <div className="menu-items" onClick={(e) => (e.currentTarget.parentElement as HTMLDetailsElement).removeAttribute('open')}>
-                <button onClick={c.saveSession}>Save markers, loops & settings…</button>
-                <button onClick={() => sessionInput.current?.click()}>Load session file…</button>
-                <button onClick={() => void forgetRecentFile()}>Don't reopen this file on next visit</button>
+                <button type="button" onClick={c.saveSession}>
+                  Save markers, loops & settings…
+                </button>
+                <button type="button" onClick={() => sessionInput.current?.click()}>
+                  Load session file…
+                </button>
+                <button type="button" onClick={() => void forgetRecentFile()}>
+                  Don't reopen this file on next visit
+                </button>
               </div>
             </details>
             <input
@@ -106,7 +130,7 @@ function Header() {
         >
           <Icon name="bug" size={20} />
         </a>
-        <button className="icon-btn" onClick={() => store.set({ helpOpen: true })} title="Help & shortcuts (?)">
+        <button type="button" className="icon-btn" onClick={() => store.set({ helpOpen: true })} title="Help & shortcuts (?)" aria-label="Help and keyboard shortcuts">
           <Icon name="help" size={20} />
         </button>
       </div>
@@ -118,31 +142,67 @@ function Welcome() {
   const input = useRef<HTMLInputElement>(null);
   return (
     <main className="welcome">
-      <div className="drop-card" onClick={() => input.current?.click()} role="button" tabIndex={0}>
+      {/* biome-ignore lint/a11y/useSemanticElements: a <button> may not contain the heading, paragraphs and file input this card holds */}
+      <div
+        className="drop-card"
+        onClick={() => input.current?.click()}
+        onKeyDown={(e) => {
+          // role="button" promises Enter/Space activation; a plain <div> doesn't give it.
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            input.current?.click();
+          }
+        }}
+        role="button"
+        tabIndex={0}
+        aria-label="Choose an audio or video file to open"
+      >
         <div className="drop-icon">
           <Icon name="open" size={40} />
         </div>
         <h1>Drop a song here to start learning it</h1>
         <p>or click to choose an audio or video file</p>
-        <p className="formats">
-          MP3 · WAV · FLAC · AAC/M4A · OGG · Opus · AIFF · WMA · ALAC · APE · WavPack · AC3 · MP4 · MOV · MKV · WebM · and more
-        </p>
+        <p className="formats">MP3 · WAV · FLAC · AAC/M4A · OGG · Opus · AIFF · WMA · ALAC · APE · WavPack · AC3 · MP4 · MOV · MKV · WebM · and more</p>
         <input ref={input} type="file" accept={ACCEPT} hidden onChange={(e) => handleFiles(e.target.files)} />
       </div>
       <ul className="feature-grid">
-        <li><h2>Slow down without pitch change</h2><span>5%–400% speed with high-quality time stretching.</span></li>
-        <li><h2>Transpose & fine-tune</h2><span>±24 semitones, cents, formant preservation.</span></li>
-        <li><h2>A–B loops & speed trainer</h2><span>Seamless loops, pauses, count-ins, step-up speed practice.</span></li>
-        <li><h2>Note & chord guessing</h2><span>Pitch spectrum on a keyboard, chord names, pitch roll & chord timeline.</span></li>
-        <li><h2>Tempo, beats & key</h2><span>Auto-detected BPM & key, tap tempo, beat grid, metronome.</span></li>
-        <li><h2>Isolate parts</h2><span>Parametric EQ, karaoke vocal cancel, L/R/mono channels.</span></li>
-        <li><h2>Markers</h2><span>Tap markers while listening, loop between markers.</span></li>
-        <li><h2>Export & sessions</h2><span>Render processed WAVs; save your markers and loops to a file.</span></li>
+        <li>
+          <h2>Slow down without pitch change</h2>
+          <span>5%–400% speed with high-quality time stretching.</span>
+        </li>
+        <li>
+          <h2>Transpose & fine-tune</h2>
+          <span>±24 semitones, cents, formant preservation.</span>
+        </li>
+        <li>
+          <h2>A–B loops & speed trainer</h2>
+          <span>Seamless loops, pauses, count-ins, step-up speed practice.</span>
+        </li>
+        <li>
+          <h2>Note & chord guessing</h2>
+          <span>Pitch spectrum on a keyboard, chord names, pitch roll & chord timeline.</span>
+        </li>
+        <li>
+          <h2>Tempo, beats & key</h2>
+          <span>Auto-detected BPM & key, tap tempo, beat grid, metronome.</span>
+        </li>
+        <li>
+          <h2>Isolate parts</h2>
+          <span>Parametric EQ, karaoke vocal cancel, L/R/mono channels.</span>
+        </li>
+        <li>
+          <h2>Markers</h2>
+          <span>Tap markers while listening, loop between markers.</span>
+        </li>
+        <li>
+          <h2>Export & sessions</h2>
+          <span>Render processed WAVs; save your markers and loops to a file.</span>
+        </li>
       </ul>
       <div className="disclaimers">
         <p>
-          🔒 100% local: files are processed in your browser and never uploaded. Your last file (up to{' '}
-          {RECENT_FILE_MAX_BYTES / 1024 / 1024} MB) and per-song settings are kept in this browser so you can pick up where you left off.
+          🔒 100% local: files are processed in your browser and never uploaded. Your last file (up to {RECENT_FILE_MAX_BYTES / 1024 / 1024} MB) and per-song settings are kept in
+          this browser so you can pick up where you left off.
         </p>
         <p className="free-note">100% free: No subscriptions, no premium-only features.</p>
       </div>
@@ -164,7 +224,7 @@ function Overlays() {
   return (
     <>
       {loading && (
-        <div className="loading-overlay">
+        <div className="loading-overlay" role="status" aria-live="polite">
           <div className="loading-card">
             <div className="spinner" />
             <p>{loading.message}</p>
@@ -180,7 +240,7 @@ function Overlays() {
         {notice && (
           <div className="toast notice" role="status">
             <span>{notice}</span>
-            <button className="icon-btn small" onClick={() => store.set({ notice: null })}>
+            <button type="button" className="icon-btn small" onClick={() => store.set({ notice: null })} aria-label="Dismiss message">
               <Icon name="close" size={14} />
             </button>
           </div>
@@ -188,7 +248,7 @@ function Overlays() {
         {error && (
           <div className="toast" role="alert">
             <span>{error}</span>
-            <button className="icon-btn small" onClick={() => store.set({ error: null })}>
+            <button type="button" className="icon-btn small" onClick={() => store.set({ error: null })} aria-label="Dismiss error">
               <Icon name="close" size={14} />
             </button>
           </div>
@@ -253,6 +313,7 @@ export default function App() {
       <Header />
       {hasFile ? (
         <main className="workspace">
+          <AnalysisStatus />
           <div className="sticky-top">
             <Transport />
             <Timeline />

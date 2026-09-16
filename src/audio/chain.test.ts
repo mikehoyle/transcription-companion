@@ -1,13 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import { createChain, type ProcessingChain } from './chain';
 import { DEFAULT_EQ, initialState, type AppState, type ChannelMode } from '../store';
-import {
-  FakeAudioContext,
-  type FakeBiquadNode,
-  type FakeGainNode,
-  type FakeNode,
-  type FakePannerNode,
-} from './fakeAudioContext';
+import { FakeAudioContext, type FakeBiquadNode, type FakeGainNode, type FakeNode, type FakePannerNode } from './fakeAudioContext';
 
 const SAMPLE_RATE = 48000;
 const NYQUIST = SAMPLE_RATE / 2;

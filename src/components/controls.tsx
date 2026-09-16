@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
 
 export function Panel({ title, children, actions, className = '' }: { title: string; children: ReactNode; actions?: ReactNode; className?: string }) {
+  const titleId = useId();
   return (
-    <section className={`panel ${className}`}>
+    <section className={`panel ${className}`} aria-labelledby={titleId}>
       <header className="panel-head">
-        <h2>{title}</h2>
+        <h2 id={titleId}>{title}</h2>
         {actions && <div className="panel-actions">{actions}</div>}
       </header>
       <div className="panel-body">{children}</div>
@@ -25,18 +26,24 @@ interface SliderProps {
   /** non-linear mapping, e.g. log frequency */
   scale?: 'linear' | 'log';
   title?: string;
+  /** Accessible name, for sliders whose visible label is absent or ambiguous (e.g. repeated EQ bands). */
+  ariaLabel?: string;
 }
 
-export function Slider({ label, value, min, max, step, onChange, format, defaultValue, disabled, scale = 'linear', title }: SliderProps) {
+export function Slider({ label, value, min, max, step, onChange, format, defaultValue, disabled, scale = 'linear', title, ariaLabel }: SliderProps) {
   const toPos = (v: number) => (scale === 'log' ? (Math.log(v / min) / Math.log(max / min)) * 1000 : v);
-  const fromPos = (p: number) => (scale === 'log' ? min * Math.pow(max / min, p / 1000) : p);
+  const fromPos = (p: number) => (scale === 'log' ? min * (max / min) ** (p / 1000) : p);
   // Reserve room for the widest end-of-range label so the track doesn't resize (and shift under the pointer) as the value text changes.
   const valueWidth = format ? Math.max(format(min).length, format(max).length) : Math.max(String(min).length, String(max).length);
+  // On a log scale the input's own value is a position, not the value, so spell the value out.
+  const valueText = format?.(value) || (scale === 'log' ? String(value) : '');
   return (
     <label className={`slider ${disabled ? 'disabled' : ''}`} title={title}>
       <span className="slider-label">{label}</span>
       <input
         type="range"
+        aria-label={ariaLabel}
+        aria-valuetext={valueText || undefined}
         min={scale === 'log' ? 0 : min}
         max={scale === 'log' ? 1000 : max}
         step={scale === 'log' ? 1 : step}
@@ -63,10 +70,11 @@ export function NumberField({
   min,
   max,
   format = (v) => String(v),
-  parse = (t) => (t.trim() === '' || isNaN(Number(t)) ? null : Number(t)),
+  parse = (t) => (t.trim() === '' || Number.isNaN(Number(t)) ? null : Number(t)),
   width = '5em',
   title,
   suffix,
+  ariaLabel,
 }: {
   value: number;
   onChange: (v: number) => void;
@@ -78,6 +86,8 @@ export function NumberField({
   width?: string;
   title?: string;
   suffix?: string;
+  /** Accessible name, for fields whose visible label isn't a <label> around them. */
+  ariaLabel?: string;
 }) {
   const [text, setText] = useState(format(value));
   const [focused, setFocused] = useState(false);
@@ -99,6 +109,7 @@ export function NumberField({
         style={{ width }}
         value={text}
         title={title}
+        aria-label={ariaLabel}
         onFocus={(e) => {
           setFocused(true);
           e.target.select();
@@ -141,15 +152,19 @@ export function Segmented<T extends string | number>({
   options,
   onChange,
   title,
+  ariaLabel,
 }: {
   value: T;
   options: { value: T; label: ReactNode; title?: string }[];
   onChange: (v: T) => void;
   title?: string;
+  /** Names the radio group; without one a screen reader announces the options with no context. */
+  ariaLabel?: string;
 }) {
   return (
-    <div className="segmented" role="radiogroup" title={title}>
+    <div className="segmented" role="radiogroup" title={title} aria-label={ariaLabel}>
       {options.map((o) => (
+        // biome-ignore lint/a11y/useSemanticElements: real radio inputs can't be styled as this segmented control
         <button
           key={String(o.value)}
           type="button"

@@ -61,14 +61,7 @@ describe('sessionPatch', () => {
 
   it('sorts markers by time and drops unusable ones', () => {
     const patch = sessionPatch({
-      markers: [
-        { id: 'b', time: 30, label: 'late' },
-        'not a marker',
-        { id: 'a', time: 5, label: 'early' },
-        { id: 'c', time: 'soon' },
-        null,
-        { id: 'd' },
-      ],
+      markers: [{ id: 'b', time: 30, label: 'late' }, 'not a marker', { id: 'a', time: 5, label: 'early' }, { id: 'c', time: 'soon' }, null, { id: 'd' }],
     });
     expect(patch.markers!.map((m) => m.label)).toEqual(['early', 'late']);
   });

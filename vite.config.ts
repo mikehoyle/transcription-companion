@@ -1,5 +1,8 @@
 import { createServer, defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
+// Shared with nginx.conf and public/_headers, which scripts/gen-headers.mjs
+// generates from it, so `npm run preview` exercises the production policy.
+import { CSP } from './config/csp.mjs';
 
 // Renders the initial (welcome) screen into index.html at build time so search
 // engines and link previews see real content without running JavaScript.
@@ -25,27 +28,6 @@ function prerender(): Plugin {
     },
   };
 }
-
-// Mirrors the Content-Security-Policy served in production — keep in sync with
-// nginx.conf (Docker) and public/_headers (Cloudflare Pages) — so that
-// `npm run preview` exercises the same restrictions.
-// - blob: in script-src is required because signalsmith-stretch loads its
-//   AudioWorklet module from a Blob URL.
-// - 'wasm-unsafe-eval' allows WebAssembly compilation (stretch + ffmpeg).
-export const CSP = [
-  "default-src 'self'",
-  "script-src 'self' blob: 'wasm-unsafe-eval'",
-  "worker-src 'self' blob:",
-  "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob:",
-  "media-src 'self' blob:",
-  "connect-src 'self' blob: data:",
-  "font-src 'self'",
-  "object-src 'none'",
-  "base-uri 'self'",
-  "form-action 'none'",
-  "frame-ancestors 'none'",
-].join('; ');
 
 export default defineConfig({
   base: './',

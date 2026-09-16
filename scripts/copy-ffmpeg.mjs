@@ -50,5 +50,5 @@ for (let i = 0, n = 0; i < wasm.length; i += PART_SIZE, n++) {
 }
 
 const manifest = { version, core: `${version}/ffmpeg-core.js`, wasmParts, wasmSize };
-writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + '\n');
+writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`);
 console.log(`ffmpeg core ${version}: copied, wasm split into ${wasmParts.length} parts`);

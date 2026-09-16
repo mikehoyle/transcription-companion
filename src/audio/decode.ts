@@ -4,7 +4,7 @@ export const VIDEO_EXTENSIONS = ['mp4', 'm4v', 'mov', 'webm', 'mkv', 'avi', 'wmv
 
 export const ACCEPT =
   'audio/*,video/*,.mp3,.wav,.wave,.flac,.ogg,.oga,.opus,.m4a,.aac,.alac,.aif,.aiff,.aifc,.wma,.ape,.wv,.ac3,.eac3,.dts,.amr,.au,.snd,.caf,.mka,.mpc,.tta,.ra,.spx,.mid,' +
-  VIDEO_EXTENSIONS.map((e) => '.' + e).join(',');
+  VIDEO_EXTENSIONS.map((e) => `.${e}`).join(',');
 
 export const extension = (name: string) => name.split('.').pop()?.toLowerCase() ?? '';
 
@@ -68,7 +68,7 @@ async function convertWithFFmpeg(name: string, data: Uint8Array, onProgress: Pro
     if (progress >= 0 && progress <= 1) onProgress('Converting with ffmpeg…', progress);
   });
 
-  const input = 'input.' + (extension(name) || 'bin');
+  const input = `input.${extension(name) || 'bin'}`;
   try {
     await ffmpeg.writeFile(input, data);
     onProgress('Converting with ffmpeg…', 0);

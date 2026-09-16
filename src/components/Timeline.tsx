@@ -65,14 +65,13 @@ const pitchShift = (s: AppState) => Math.round(s.semitones + s.cents / 100);
 
 // ---------------------------------------------------------------- pointer
 
-type Drag =
-  | { type: 'pending'; x0: number; t0: number }
-  | { type: 'select'; t0: number }
-  | { type: 'marker'; id: string; moved: boolean }
-  | { type: 'loop-start' | 'loop-end' };
+type Drag = { type: 'pending'; x0: number; t0: number } | { type: 'select'; t0: number } | { type: 'marker'; id: string; moved: boolean } | { type: 'loop-start' | 'loop-end' };
 
 /** `mounted` must change whenever the canvas is conditionally rendered, so listeners get (re)attached. */
 function useTimelinePointer(ref: RefObject<HTMLCanvasElement | null>, hover: { current: number | null }, markerZone: boolean, mounted = true) {
+  // `mounted` is what reattaches the listeners when a conditionally rendered canvas
+  // appears; the rule treats this custom hook's parameter as an outer-scope value.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: see above
   useEffect(() => {
     const canvas = ref.current;
     if (!canvas) return;
@@ -209,7 +208,7 @@ function drawWaveLayer(ctx: CanvasRenderingContext2D, s: AppState, w: number, to
   const mid = top + h / 2;
   const amp = (h / 2) * 0.95;
   const sr = buffer.sampleRate;
-  const samplesPerPx = (sr / m.pxPerSec) / dpr;
+  const samplesPerPx = sr / m.pxPerSec / dpr;
   ctx.save();
   ctx.scale(dpr, dpr);
   if (samplesPerPx >= peaks.bucket) {
@@ -274,7 +273,7 @@ function drawGrid(ctx: CanvasRenderingContext2D, s: AppState, w: number, top: nu
   if (beatPx * bpb < 4) return;
   const k0 = Math.floor((s.view.start - s.tempo.offset) / beat);
   const k1 = Math.ceil((s.view.end - s.tempo.offset) / beat);
-  const barEvery = Math.max(1, Math.pow(2, Math.ceil(Math.log2(28 / (beatPx * bpb)))));
+  const barEvery = Math.max(1, 2 ** Math.ceil(Math.log2(28 / (beatPx * bpb))));
   ctx.font = '10px ui-monospace, SFMono-Regular, Menlo, monospace';
   for (let k = k0; k <= k1; k++) {
     const t = s.tempo.offset + k * beat;
@@ -480,6 +479,8 @@ function renderRollLayer(ctx: CanvasRenderingContext2D, s: AppState, w: number, 
 export function Timeline() {
   const hasFile = useStore((s) => s.file !== null);
   const showRoll = useStore((s) => s.showRoll);
+  const duration = useStore((s) => s.file?.duration ?? 0);
+  const markerCount = useStore((s) => s.markers.length);
   const overviewRef = useRef<HTMLCanvasElement>(null);
   const waveRef = useRef<HTMLCanvasElement>(null);
   const rollRef = useRef<HTMLCanvasElement>(null);
@@ -491,7 +492,9 @@ export function Timeline() {
   useTimelinePointer(waveRef, hover, true);
   useTimelinePointer(rollRef, hover, false, showRoll);
 
-  // overview: click/drag to move the visible window
+  // overview: click/drag to move the visible window.
+  // Re-runs on `hasFile` because there is no canvas to attach to until a file is open.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: see above
   useEffect(() => {
     const canvas = overviewRef.current;
     if (!canvas) return;
@@ -566,17 +569,11 @@ export function Timeline() {
       const ctx = wv.getContext('2d')!;
       const waveTop = RULER_H;
       const waveBottom = h - CHORD_H;
-      const layer = cachedLayer(
-        waveLayer,
-        `${wv.width}x${wv.height}:${st.file!.name}:${st.view.start}:${st.view.end}`,
-        wv.width,
-        wv.height,
-        (lc) => {
-          lc.fillStyle = COL.bg;
-          lc.fillRect(0, 0, wv.width, wv.height);
-          drawWaveLayer(lc, st, w, waveTop + 16, waveBottom - waveTop - 16, dpr);
-        },
-      );
+      const layer = cachedLayer(waveLayer, `${wv.width}x${wv.height}:${st.file!.name}:${st.view.start}:${st.view.end}`, wv.width, wv.height, (lc) => {
+        lc.fillStyle = COL.bg;
+        lc.fillRect(0, 0, wv.width, wv.height);
+        drawWaveLayer(lc, st, w, waveTop + 16, waveBottom - waveTop - 16, dpr);
+      });
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.drawImage(layer, 0, 0);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -645,11 +642,7 @@ export function Timeline() {
         ctx.fillStyle = COL.ruler;
         ctx.font = '12px system-ui, sans-serif';
         const msg =
-          st.analysis.status === 'running'
-            ? `Analysing pitches… ${Math.round(st.analysis.progress * 100)}%`
-            : st.analysis.status === 'error'
-              ? 'Pitch analysis failed'
-              : '';
+          st.analysis.status === 'running' ? `Analysing pitches… ${Math.round(st.analysis.progress * 100)}%` : st.analysis.status === 'error' ? 'Pitch analysis failed' : '';
         ctx.fillText(msg, GUTTER + 12, h / 2);
       }
       if (st.gridVisible) drawGrid(ctx, st, w, 0, h, false);
@@ -660,11 +653,33 @@ export function Timeline() {
   });
 
   if (!hasFile) return null;
+  // The canvases are the app's main output but have no DOM of their own, so each one
+  // describes what it draws. The descriptions deliberately leave out the playhead and
+  // visible window, which change many times a second; AnalysisStatus announces the
+  // things worth hearing about (key, tempo, the chord under a stopped playhead).
   return (
-    <div className="timeline">
-      <canvas ref={overviewRef} className="tl-overview" />
-      <canvas ref={waveRef} className="tl-wave" />
-      {showRoll && <canvas ref={rollRef} className="tl-roll" title="Pitch roll: brightness shows how strongly each note sounds over time" />}
-    </div>
+    <section className="timeline" aria-label="Timeline">
+      <canvas
+        ref={overviewRef}
+        className="tl-overview"
+        role="img"
+        aria-label={`Overview of the whole recording, ${fmtTime(duration, 0)} long, with the visible window highlighted. Drag to move it.`}
+      />
+      <canvas
+        ref={waveRef}
+        className="tl-wave"
+        role="img"
+        aria-label={`Waveform with time ruler, loop region, detected chords and ${markerCount === 1 ? '1 marker' : `${markerCount} markers`}. Click to move the playhead, drag to select a loop.`}
+      />
+      {showRoll && (
+        <canvas
+          ref={rollRef}
+          className="tl-roll"
+          role="img"
+          aria-label="Pitch roll: brightness shows how strongly each note sounds over time, on a piano keyboard from low notes at the bottom."
+          title="Pitch roll: brightness shows how strongly each note sounds over time"
+        />
+      )}
+    </section>
   );
 }

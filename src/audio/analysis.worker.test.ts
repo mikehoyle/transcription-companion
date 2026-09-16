@@ -40,7 +40,10 @@ function render(): Float32Array {
 
   // A percussive click on each beat, so there are onsets to find a tempo in.
   let seed = 12345;
-  const noise = () => ((seed = (seed * 1664525 + 1013904223) % 4294967296) / 2147483648 - 1);
+  const noise = () => {
+    seed = (seed * 1664525 + 1013904223) % 4294967296;
+    return seed / 2147483648 - 1;
+  };
   for (let beat = 0; beat * BEAT * ANALYSIS_RATE < total; beat++) {
     const start = Math.round(beat * BEAT * ANALYSIS_RATE);
     const len = Math.round(0.02 * ANALYSIS_RATE);

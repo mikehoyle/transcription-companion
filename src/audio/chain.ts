@@ -58,7 +58,7 @@ export function createChain(ctx: BaseAudioContext): ProcessingChain {
 
   const hp = ctx.createBiquadFilter();
   hp.type = 'highpass';
-  hp.Q.value = 0.707;
+  hp.Q.value = Math.SQRT1_2; // Butterworth
   const bands = [0, 1, 2, 3, 4, 5].map(() => {
     const f = ctx.createBiquadFilter();
     f.type = 'peaking';
@@ -66,7 +66,7 @@ export function createChain(ctx: BaseAudioContext): ProcessingChain {
   });
   const lp = ctx.createBiquadFilter();
   lp.type = 'lowpass';
-  lp.Q.value = 0.707;
+  lp.Q.value = Math.SQRT1_2; // Butterworth
   const filters = [hp, ...bands, lp];
 
   let node: AudioNode = sum;
@@ -95,7 +95,9 @@ export function createChain(ctx: BaseAudioContext): ProcessingChain {
     // would take the whole graph down mid-playback, so fall back rather than throw.
     apply(s, immediate = false) {
       const m = MATRIX[s.channelMode] ?? MATRIX.stereo;
-      gains.forEach((g, i) => set(g.gain, m[i], immediate));
+      gains.forEach((g, i) => {
+        set(g.gain, m[i], immediate);
+      });
       set(bassGain.gain, s.channelMode === 'karaoke' && s.karaokeKeepBass ? 1 : 0, immediate);
 
       const eq = s.eq;
@@ -106,7 +108,10 @@ export function createChain(ctx: BaseAudioContext): ProcessingChain {
       // filter is dropped and a filter with no band goes flat.
       bands.forEach((filter, i) => {
         const b = eq.bands[i];
-        if (!b) return set(filter.gain, 0, immediate);
+        if (!b) {
+          set(filter.gain, 0, immediate);
+          return;
+        }
         set(filter.frequency, b.freq, immediate);
         set(filter.Q, b.q, immediate);
         set(filter.gain, eq.enabled ? b.gain : 0, immediate);
