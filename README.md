@@ -21,6 +21,7 @@ exported on your machine, and nothing is uploaded or persisted. The container on
 | **Pitch roll & chord lane** | Whole-song constant-semitone spectrogram aligned with the waveform, plus an automatic chord timeline. |
 | **Isolate parts** | 6-band parametric EQ with draggable response curve, high/low-pass filters, instrument presets; stereo / mono / left / right / swap / karaoke (centre cancel, with bass restore); balance & volume. |
 | **Markers** | Tap markers while listening, rename, drag, jump with 1–9, loop from a marker to the next. |
+| **Tuner** | A separate page (`/tuner/`, popped out from the tuning fork in the header): reference tones for 27 tunings across guitar, bass, ukulele, violin, viola, cello, double bass, mandolin and banjo. Pluck or drone, three timbres, per-string semitone tweaks, octave shift, hands-free auto-repeat (on by default, and it waits for your first note), any chromatic note, and A4 adjustable from 415 to 466 Hz. One note sounds at a time, so a new pick cuts whatever is still ringing. It plays tones only — no microphone. |
 | **Export** | Render the loop or whole file to WAV with the current speed, pitch, channel and EQ settings. |
 | **Sessions** | Markers, loops, tempo and settings are autosaved per file in the browser (localStorage) and restored when you reopen it; the last opened file (up to 100 MB) is kept in IndexedDB and reopened on your next visit. Sessions can also be saved/loaded as a small JSON file. |
 | **Keyboard** | Extensive shortcuts — press `?` in the app for the full list. |
@@ -31,7 +32,7 @@ Requires Node 22.12+ (see `.nvmrc`).
 
 ```bash
 npm install
-npm run dev        # http://localhost:5173
+npm run dev        # http://localhost:5173 — the tuner is at /tuner/
 ```
 
 ```bash
@@ -119,9 +120,17 @@ src/
     music.ts           semitone spectrum, note/chord/key/tempo algorithms
     fft.ts, wav.ts, export.ts
   components/          React UI (timeline canvases, transport, panels)
+  tuner/
+    Tuner.tsx          the tuner page's UI
+    tunings.ts         tuning presets, pitch maths and settings validation
+    tone.ts            oscillator voices for the tuner (output only; no microphone).
+                       Every envelope edge is a raised-cosine curve, scheduled slightly ahead
+                       of the clock: a linear ramp's corners are audible as a tick when one
+                       note replaces another.
+  tuner.tsx            entry point for /tuner/ (see tuner/index.html)
   controller.ts        user actions, file loading, sessions, export
   session.ts           validation for session data from files and localStorage
-  prerender.tsx        build-time render of the welcome screen into index.html (for SEO / link previews)
+  prerender.tsx        build-time render of each page's first screen into its HTML (for SEO / link previews)
   store.ts             tiny external store used with useSyncExternalStore
   shortcuts.ts         keyboard shortcuts
   *.test.ts            unit tests, run with `npm test` (Vitest)
@@ -131,8 +140,10 @@ src/
 The tests cover the parts where a mistake is silent rather than loud: the FFT (against a
 naive DFT), note/chord/key/tempo detection on synthesised audio, the analysis worker
 end-to-end over a known progression, session validation, the WAV encoder, the processing
-chain's routing and filter settings, the remembered-file store, and the view/loop/marker
-logic in the controller.
+chain's routing and filter settings, the remembered-file store, the view/loop/marker
+logic in the controller, the tuner's pitch maths — including a check that every preset
+sounds the notes its name spells out — and the shape of the tuner's envelope ramp, whose
+flat ends are what keep note swaps from clicking.
 
 They run in Node, with no browser: `chain.ts` is driven through a fake AudioContext that
 records what was built and what was written to each AudioParam, and `recentFile.ts`
