@@ -479,6 +479,7 @@ function renderRollLayer(ctx: CanvasRenderingContext2D, s: AppState, w: number, 
 export function Timeline() {
   const hasFile = useStore((s) => s.file !== null);
   const showRoll = useStore((s) => s.showRoll);
+  const showNotes = useStore((s) => s.showNotes);
   const duration = useStore((s) => s.file?.duration ?? 0);
   const markerCount = useStore((s) => s.markers.length);
   const overviewRef = useRef<HTMLCanvasElement>(null);
@@ -568,8 +569,11 @@ export function Timeline() {
       const [w, h, dpr] = fitCanvas(wv);
       const ctx = wv.getContext('2d')!;
       const waveTop = RULER_H;
-      const waveBottom = h - CHORD_H;
-      const layer = cachedLayer(waveLayer, `${wv.width}x${wv.height}:${st.file!.name}:${st.view.start}:${st.view.end}`, wv.width, wv.height, (lc) => {
+      // The chord row shares the toggle with the notes panel, and the waveform takes
+      // back its strip when it is off.
+      const chordH = st.showNotes ? CHORD_H : 0;
+      const waveBottom = h - chordH;
+      const layer = cachedLayer(waveLayer, `${wv.width}x${wv.height}:${st.file!.name}:${st.view.start}:${st.view.end}:${chordH}`, wv.width, wv.height, (lc) => {
         lc.fillStyle = COL.bg;
         lc.fillRect(0, 0, wv.width, wv.height);
         drawWaveLayer(lc, st, w, waveTop + 16, waveBottom - waveTop - 16, dpr);
@@ -581,7 +585,7 @@ export function Timeline() {
       if (st.gridVisible) drawGrid(ctx, st, w, 0, waveBottom, true);
       drawLoop(ctx, st, w, waveTop, waveBottom);
       drawMarkers(ctx, st, w, waveTop, waveBottom, true);
-      drawChords(ctx, st, w, waveBottom);
+      if (st.showNotes) drawChords(ctx, st, w, waveBottom);
       ctx.fillStyle = COL.gutter;
       ctx.fillRect(0, RULER_H, GUTTER, waveBottom - RULER_H);
       ctx.fillStyle = COL.ruler;
@@ -669,7 +673,7 @@ export function Timeline() {
         ref={waveRef}
         className="tl-wave"
         role="img"
-        aria-label={`Waveform with time ruler, loop region, detected chords and ${markerCount === 1 ? '1 marker' : `${markerCount} markers`}. Click to move the playhead, drag to select a loop.`}
+        aria-label={`Waveform with time ruler, loop region, ${showNotes ? 'detected chords and ' : ''}${markerCount === 1 ? '1 marker' : `${markerCount} markers`}. Click to move the playhead, drag to select a loop.`}
       />
       {showRoll && (
         <canvas
