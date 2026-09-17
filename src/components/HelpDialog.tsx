@@ -58,6 +58,13 @@ export function HelpDialog() {
             <li>
               <b>Karaoke</b> mode cancels centre-panned sound (often lead vocal); try <b>Left/Right only</b> for hard-panned parts.
             </li>
+            <li>
+              The <b>tuning fork</b> in the header opens the{' '}
+              <a href="./tuner/" target="_blank" rel="noopener">
+                tuner
+              </a>{' '}
+              — reference tones for guitar, bass, ukulele, violin, mandolin and banjo, with an adjustable A4 to match a recording.
+            </li>
           </ul>
           <p className="muted">
             Everything happens locally in your browser. Audio files are never uploaded anywhere. Your markers, loops and settings are remembered per file in this browser, and your

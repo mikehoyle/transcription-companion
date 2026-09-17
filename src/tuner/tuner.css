@@ -1,0 +1,114 @@
+/* Tuner page. Loaded after styles.css, which supplies the tokens and the shared
+   .panel / .chip / .btn / slider styles. */
+
+.tuner-page .brand { color: inherit; text-decoration: none; }
+.tuner-page .brand:hover .brand-name { color: var(--accent); }
+.tuner-page .header-actions .btn { text-decoration: none; color: inherit; }
+
+.tuner {
+  flex: 1;
+  width: min(1100px, 100%);
+  margin: 0 auto;
+  padding: 18px 16px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ---------- readout ---------- */
+.tuner-readout {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+}
+.tuner-note {
+  font-size: 54px;
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  min-width: 2.6em;
+  color: var(--muted);
+  transition: color 0.15s;
+}
+.tuner-note.sounding { color: var(--accent); }
+.tuner-readout-side { display: flex; flex-direction: column; gap: 3px; }
+.tuner-hz { font-family: var(--mono); font-size: 20px; font-variant-numeric: tabular-nums; }
+.tuner-sub { color: var(--muted); font-size: 12px; }
+.tuner-readout-actions { margin-left: auto; display: flex; gap: 8px; }
+.tuner-readout-actions .btn:disabled { opacity: 0.4; cursor: default; }
+
+/* ---------- strings ---------- */
+.tuner-strings-wrap { display: flex; flex-direction: column; gap: 10px; }
+.tuner-picker { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.tuning-select { max-width: min(420px, 100%); }
+
+.tuner-strings {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  gap: 10px;
+}
+.tuner-string { display: flex; flex-direction: column; align-items: stretch; gap: 4px; }
+.string-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 14px 8px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, transform 0.12s;
+}
+.string-btn:hover { background: var(--surface-2); transform: translateY(-1px); }
+.string-num { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.string-note { font-size: 26px; font-weight: 700; line-height: 1.15; }
+.string-hz { font-family: var(--mono); font-size: 11px; color: var(--muted); }
+
+.tuner-string.current .string-btn { border-color: var(--surface-3); }
+.tuner-string.on .string-btn {
+  background: rgba(245, 165, 36, 0.12);
+  border-color: var(--accent);
+  color: var(--accent);
+  animation: tuner-pulse 1.6s ease-in-out infinite;
+}
+.tuner-string.on .string-num,
+.tuner-string.on .string-hz { color: inherit; opacity: 0.8; }
+@keyframes tuner-pulse {
+  50% { box-shadow: 0 0 0 4px rgba(245, 165, 36, 0.12); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .string-btn { transition: none; }
+  .tuner-string.on .string-btn { animation: none; }
+}
+
+.string-tweak { display: flex; align-items: center; justify-content: center; gap: 6px; }
+.string-tweak .chip { padding: 0 8px; line-height: 1.6; }
+.string-offset { font-family: var(--mono); font-size: 11px; color: var(--muted); min-width: 2em; text-align: center; }
+.string-offset.set { color: var(--accent); }
+
+/* ---------- panels ---------- */
+.tuner-panels {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 12px;
+  align-items: start;
+}
+.tuner-panels .preset-row .hint { flex-basis: 100%; }
+.tuner-keys { margin: 0; }
+.tuner-keys .shortcut { grid-template-columns: 110px 1fr; }
+.tuner-keys dd { margin: 0; color: var(--muted); }
+
+@media (max-width: 560px) {
+  .tuner-note { font-size: 42px; }
+  .tuner-readout-actions { margin-left: 0; width: 100%; }
+  .tuner-readout-actions .btn { flex: 1; justify-content: center; }
+}
