@@ -119,6 +119,8 @@ export interface AppState {
 
   transposeDisplay: number; // semitones added for transposing instruments
   helpOpen: boolean;
+  /** The standalone metronome dialog. */
+  clickTrackOpen: boolean;
 }
 
 export const DEFAULT_EQ: EqState = {
@@ -184,6 +186,7 @@ export const initialState = (): AppState => ({
   analysis: { status: 'idle', progress: 0, key: null, chords: [], roll: null },
   transposeDisplay: 0,
   helpOpen: false,
+  clickTrackOpen: false,
 });
 
 type Listener = (state: AppState, prev: AppState) => void;

@@ -107,6 +107,17 @@ export function TempoPanel() {
           </Toggle>
         </div>
       </div>
+
+      <div className="subsection">
+        <button
+          type="button"
+          className="chip small standalone-metronome-btn"
+          onClick={() => store.set({ clickTrackOpen: true })}
+          title="A metronome of its own, for practising without the recording"
+        >
+          Standalone metronome…
+        </button>
+      </div>
     </Panel>
   );
 }

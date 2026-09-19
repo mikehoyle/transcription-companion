@@ -62,7 +62,7 @@ export function Slider({ label, value, min, max, step, onChange, format, default
   );
 }
 
-/** Numeric text field that commits on Enter/blur; supports arrow-key stepping. */
+/** Numeric text field that commits on Enter/blur (and optionally after a pause in typing); supports arrow-key stepping. */
 export function NumberField({
   value,
   onChange,
@@ -75,6 +75,8 @@ export function NumberField({
   title,
   suffix,
   ariaLabel,
+  accept,
+  commitDelay,
 }: {
   value: number;
   onChange: (v: number) => void;
@@ -88,14 +90,22 @@ export function NumberField({
   suffix?: string;
   /** Accessible name, for fields whose visible label isn't a <label> around them. */
   ariaLabel?: string;
+  /** Edits whose whole text doesn't match are refused, e.g. /^\d*$/ for whole numbers only. */
+  accept?: RegExp;
+  /** Also commit this many ms after the last keystroke, without waiting for Enter or blur. */
+  commitDelay?: number;
 }) {
   const [text, setText] = useState(format(value));
   const [focused, setFocused] = useState(false);
   const ref = useRef<HTMLInputElement>(null);
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const cancelDelayed = () => clearTimeout(timer.current);
+  useEffect(() => () => clearTimeout(timer.current), []);
   useEffect(() => {
     if (!focused) setText(format(value));
   }, [value, focused, format]);
   const commit = (v: number | null) => {
+    cancelDelayed();
     if (v === null) return setText(format(value));
     if (min !== undefined) v = Math.max(min, v);
     if (max !== undefined) v = Math.min(max, v);
@@ -118,12 +128,24 @@ export function NumberField({
           setFocused(false);
           commit(parse(text));
         }}
-        onChange={(e) => setText(e.target.value)}
+        onChange={(e) => {
+          const t = e.target.value;
+          if (accept && !accept.test(t)) return;
+          setText(t);
+          if (commitDelay === undefined) return;
+          cancelDelayed();
+          timer.current = setTimeout(() => {
+            // A field cleared to type afresh is left alone; blur still puts the old value back.
+            const v = parse(t);
+            if (v !== null) commit(v);
+          }, commitDelay);
+        }}
         onKeyDown={(e) => {
           if (e.key === 'Enter') {
             commit(parse(text));
             ref.current?.blur();
           } else if (e.key === 'Escape') {
+            cancelDelayed();
             setText(format(value));
             ref.current?.blur();
           } else if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {

@@ -191,6 +191,7 @@ export function snap(t: number, s: AppState = store.get()): number {
 // ------------------------------------------------------------ transport
 
 export const togglePlay = () => engine.toggle();
+export const pause = () => engine.pause();
 
 export function seek(t: number) {
   engine.seek(clamp(t, 0, duration()));

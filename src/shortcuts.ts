@@ -38,6 +38,8 @@ export function installShortcuts() {
   const onKey = (e: KeyboardEvent) => {
     if (isTextInput(e.target) || e.metaKey || e.ctrlKey) return;
     const s = store.get();
+    // The standalone metronome is modal: its own controls take the keys, and Esc closes it natively.
+    if (s.clickTrackOpen) return;
     if (e.key === 'Escape' && s.helpOpen) {
       store.set({ helpOpen: false });
       return;

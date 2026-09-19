@@ -331,6 +331,44 @@ dialog.help h2 { margin: 0; font-size: 16px; }
 .shortcut { display: grid; grid-template-columns: 140px 1fr; gap: 8px; padding: 2px 0; font-size: 13px; }
 .shortcut dd { margin: 0; color: var(--muted); }
 
+dialog.click-track {
+  background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 14px;
+  padding: 0; width: min(400px, calc(100vw - 32px)); /* fits a 16-beat row of dots */
+}
+dialog.click-track::backdrop { background: rgba(0,0,0,0.6); }
+dialog.click-track header { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; border-bottom: 1px solid var(--border); }
+dialog.click-track h2 { margin: 0; font-size: 16px; }
+.click-track-body { display: flex; flex-direction: column; gap: 12px; padding: 16px 18px 18px; }
+.click-track-row { display: flex; align-items: center; justify-content: center; gap: 8px; }
+.click-track-body .bpm-box .numfield input { font-size: 28px; text-align: center; }
+.click-track-body .hint { text-align: center; }
+.beat-dots { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; min-height: 16px; }
+.beat-dot { width: 14px; height: 14px; border-radius: 50%; background: var(--surface-3); border: 1px solid var(--border); }
+.beat-dot.accent { border-color: var(--accent); }
+.beat-dot.lit { background: var(--text); }
+.beat-dot.accent.lit { background: var(--accent); }
+.click-track-toggle {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 16px 8px 12px; color: var(--text);
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+  cursor: pointer; transition: background 0.12s, border-color 0.12s, transform 0.12s;
+}
+.click-track-toggle:hover { background: var(--surface-2); transform: translateY(-1px); }
+.click-track-toggle-label { font-size: 20px; font-weight: 700; }
+.click-track-toggle.on {
+  background: rgba(245, 165, 36, 0.12); border-color: var(--accent); color: var(--accent);
+  animation: click-track-pulse 1.6s ease-in-out infinite;
+}
+@keyframes click-track-pulse { 50% { box-shadow: 0 0 0 4px rgba(245, 165, 36, 0.12); } }
+.metronome-arm { transform-origin: 24px 44px; transform-box: view-box; transition: transform var(--swing-ms, 500ms) ease-in-out; }
+.click-track-toggle:not(.on) .metronome-arm { transition-duration: 0.2s; }
+@media (prefers-reduced-motion: reduce) {
+  .click-track-toggle { transition: none; }
+  .click-track-toggle.on { animation: none; }
+  .metronome-arm { transition: none; }
+}
+.standalone-metronome-btn { align-self: flex-start; }
+
 @media (max-width: 700px) {
   .brand-text { display: none; }
   .clock { min-width: 0; }
