@@ -1,5 +1,6 @@
 import SignalsmithStretch, { type StretchNode } from 'signalsmith-stretch';
 import { createChain, type ProcessingChain } from './chain';
+import { playClick } from './clickTrack';
 import { store, type AppState } from '../store';
 
 /** One entry of the playback time map (mirrors the stretch node's own map). */
@@ -409,17 +410,7 @@ export class AudioEngine {
   }
 
   private click(when: number, accent: boolean, volume: number) {
-    const ctx = this.ctx;
-    if (!ctx || !this.clickGain) return;
-    const osc = ctx.createOscillator();
-    const g = ctx.createGain();
-    osc.frequency.value = accent ? 1760 : 1175;
-    g.gain.setValueAtTime(0, when);
-    g.gain.linearRampToValueAtTime(0.5 * volume, when + 0.002);
-    g.gain.exponentialRampToValueAtTime(0.001, when + 0.06);
-    osc.connect(g).connect(this.clickGain);
-    osc.start(when);
-    osc.stop(when + 0.08);
+    if (this.ctx && this.clickGain) playClick(this.ctx, this.clickGain, when, accent, volume);
   }
 
   /** Short click used by the tap-tempo UI. */

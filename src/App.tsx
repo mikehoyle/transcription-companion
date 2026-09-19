@@ -6,6 +6,7 @@ import { forgetRecentFile, loadRecentFile, RECENT_FILE_MAX_BYTES } from './recen
 import { store, useStore } from './store';
 import { fmtBytes, fmtTime } from './util';
 import { AnalysisStatus } from './components/AnalysisStatus';
+import { ClickTrackDialog } from './components/ClickTrackDialog';
 import { HelpDialog } from './components/HelpDialog';
 import { Icon } from './components/Icon';
 import { LoopPanel } from './components/LoopPanel';
@@ -363,6 +364,7 @@ export default function App() {
       {dragging && <div className="drag-overlay">Drop to open</div>}
       <Overlays />
       <HelpDialog />
+      <ClickTrackDialog />
     </div>
   );
 }

@@ -1,0 +1,114 @@
+// A metronome that runs on its own AudioContext, with no file loaded and
+// nothing to do with the playback engine or its beat grid.
+
+/** One metronome click: a short sine blip, higher when accented. Shared with the engine's metronome. */
+export function playClick(ctx: BaseAudioContext, dest: AudioNode, when: number, accent: boolean, volume: number) {
+  const osc = ctx.createOscillator();
+  const g = ctx.createGain();
+  osc.frequency.value = accent ? 1760 : 1175;
+  g.gain.setValueAtTime(0, when);
+  g.gain.linearRampToValueAtTime(0.5 * volume, when + 0.002);
+  g.gain.exponentialRampToValueAtTime(0.001, when + 0.06);
+  osc.connect(g).connect(dest);
+  osc.start(when);
+  osc.stop(when + 0.08);
+}
+
+export interface Click {
+  time: number;
+  /** Position in the bar, from 0; always 0 when there are no bars. */
+  beat: number;
+  accent: boolean;
+}
+
+/**
+ * The clicks from `next` (the time and bar position of the next unscheduled beat) up to
+ * `until`, and where the one after them falls. With `beats` 0 every click is the same.
+ */
+export function clicksUntil(next: { time: number; beat: number }, until: number, bpm: number, beats: number): { clicks: Click[]; next: { time: number; beat: number } } {
+  const clicks: Click[] = [];
+  let { time, beat } = next;
+  const step = 60 / bpm;
+  while (time < until) {
+    clicks.push({ time, beat, accent: beats > 0 && beat === 0 });
+    time += step;
+    beat = beats > 0 ? (beat + 1) % beats : 0;
+  }
+  return { clicks, next: { time, beat } };
+}
+
+const LOOKAHEAD = 0.12; // seconds of clicks scheduled ahead of the audio clock
+const TICK_MS = 25;
+
+export class ClickTrack {
+  private ctx: AudioContext | null = null;
+  private gain: GainNode | null = null;
+  private volume = 0.8;
+  private timer: ReturnType<typeof setInterval> | null = null;
+  private next = { time: 0, beat: 0 };
+  private bpm = 120;
+  private beats = 4;
+  /** Called (on the main thread, as close as timers allow) when each click sounds. */
+  onBeat: ((beat: number, accent: boolean) => void) | null = null;
+
+  get running() {
+    return this.timer !== null;
+  }
+
+  /** Tempo and bar changes land on the next click, without restarting the count. */
+  set(bpm: number, beats: number) {
+    this.bpm = bpm;
+    if (beats !== this.beats) {
+      this.beats = beats;
+      // Start the new bar on the next click, so the accent never lands mid-way through a changed count.
+      this.next.beat = 0;
+    }
+  }
+
+  /** 0–1; applies straight away, including to clicks already scheduled. */
+  setVolume(volume: number) {
+    this.volume = volume;
+    if (this.gain) this.gain.gain.value = volume;
+  }
+
+  /** Must be called from a user gesture the first time: that is what lets the context make sound. */
+  start() {
+    if (this.timer) return;
+    if (!this.ctx) {
+      this.ctx = new AudioContext({ latencyHint: 'interactive' });
+      this.gain = this.ctx.createGain();
+      this.gain.gain.value = this.volume;
+      this.gain.connect(this.ctx.destination);
+    }
+    if (this.ctx.state === 'suspended') void this.ctx.resume();
+    this.next = { time: this.ctx.currentTime + 0.05, beat: 0 };
+    this.tick();
+    this.timer = setInterval(() => this.tick(), TICK_MS);
+  }
+
+  stop() {
+    if (this.timer) clearInterval(this.timer);
+    this.timer = null;
+  }
+
+  dispose() {
+    this.stop();
+    void this.ctx?.close();
+    this.ctx = null;
+    this.gain = null;
+  }
+
+  private tick() {
+    const { ctx, gain } = this;
+    if (!ctx || !gain) return;
+    // After a stall (a background tab throttles timers) pick up from now rather than firing a burst of late clicks.
+    if (this.next.time < ctx.currentTime) this.next.time = ctx.currentTime + 0.01;
+    const { clicks, next } = clicksUntil(this.next, ctx.currentTime + LOOKAHEAD, this.bpm, this.beats);
+    this.next = next;
+    for (const c of clicks) {
+      playClick(ctx, gain, c.time, c.accent, 1);
+      const delay = (c.time - ctx.currentTime) * 1000;
+      setTimeout(() => this.timer && this.onBeat?.(c.beat, c.accent), Math.max(0, delay));
+    }
+  }
+}
