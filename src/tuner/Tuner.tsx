@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { type CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { NOTE_NAMES, noteName } from '../audio/music';
 import { NumberField, Segmented, Slider, Toggle } from '../components/controls';
 import { Icon } from '../components/Icon';
 import { TonePlayer } from './tone';
+import type { PlayMode } from './tunings';
 import {
   A4_DEFAULT,
   A4_MAX,
@@ -35,13 +36,24 @@ const stringVoice = (i: number) => `s${i}`;
 
 const GROUPS = [...new Set(TUNINGS.map((t) => t.group))];
 
+/** The one voice that is sounding. What it is doing is on show, so the UI carries it. */
+interface Sounding {
+  id: string;
+  /** The mode it was started in, which a later change to the setting must not rewrite. */
+  mode: PlayMode;
+  /** How long it rings for; `Infinity` for a drone, which sounds until it is stopped. */
+  secs: number;
+  /** Counts strikes, so a repeat of the same note still reads as a new one. */
+  strike: number;
+}
+
 export function Tuner() {
   // Starts at the defaults so the build-time render and the first browser render agree;
   // anything saved is applied in an effect just after mount.
   const [settings, setSettings] = useState<TunerSettings>(DEFAULT_SETTINGS);
   const [loaded, setLoaded] = useState(false);
   /** The one voice that is sounding, if any — the tuner is monophonic. */
-  const [playing, setPlaying] = useState<string | null>(null);
+  const [playing, setPlaying] = useState<Sounding | null>(null);
   /** The string the readout is showing; starts on the lowest-numbered one. */
   const [current, setCurrent] = useState(0);
   /**
@@ -51,6 +63,7 @@ export function Tuner() {
    */
   const [armed, setArmed] = useState(false);
 
+  const strikes = useRef(0);
   const player = useRef<TonePlayer | null>(null);
   // Stable, so the hooks below can declare their dependency on it.
   const getPlayer = useCallback(() => (player.current ??= new TonePlayer()), []);
@@ -72,8 +85,8 @@ export function Tuner() {
   const startVoice = useCallback(
     (id: string, freq: number) => {
       const { settings: s } = live.current;
-      getPlayer().play(id, freq, { timbre: s.timbre, mode: s.mode });
-      setPlaying(id);
+      const secs = getPlayer().play(id, freq, { timbre: s.timbre, mode: s.mode });
+      setPlaying({ id, mode: s.mode, secs, strike: ++strikes.current });
       setArmed(true);
     },
     [getPlayer],
@@ -82,7 +95,7 @@ export function Tuner() {
   const stopVoice = useCallback(
     (id: string) => {
       getPlayer().stop(id);
-      setPlaying((p) => (p === id ? null : p));
+      setPlaying((p) => (p?.id === id ? null : p));
     },
     [getPlayer],
   );
@@ -97,18 +110,22 @@ export function Tuner() {
     (i: number) => {
       const id = stringVoice(i);
       setCurrent(i);
-      // In drone mode a second click switches the string off; a pluck always retriggers.
-      // While auto-repeat is running there is nothing to switch off — the timer owns the note.
-      if (!live.current.repeating && live.current.settings.mode === 'drone' && getPlayer().isPlaying(id)) stopVoice(id);
-      else startVoice(id, live.current.freqs[i]);
+      // Clicking the string that is sounding switches it off, drone or pluck alike: the
+      // highlight says it is still going, so the click that lands on it is what has to stop
+      // it. Auto-repeat goes off with it — left running, its timer would strike the string
+      // again a moment later and the click would look ignored.
+      if (getPlayer().isPlaying(id)) {
+        stopVoice(id);
+        if (live.current.repeating) update({ autoRepeat: false });
+      } else startVoice(id, live.current.freqs[i]);
     },
-    [startVoice, stopVoice, getPlayer],
+    [startVoice, stopVoice, getPlayer, update],
   );
 
   // A plucked note stops by itself; drop its highlight when it does.
   useEffect(() => {
     const p = getPlayer();
-    p.onEnded = (id) => setPlaying((cur) => (cur === id ? null : cur));
+    p.onEnded = (id) => setPlaying((cur) => (cur?.id === id ? null : cur));
     return () => {
       p.onEnded = null;
       p.dispose();
@@ -131,11 +148,12 @@ export function Tuner() {
 
   // Changing A4, the octave or a single string re-pitches whatever is sounding rather than
   // retriggering it, so you can slide the reference under a held drone.
+  const playingId = playing?.id ?? null;
   useEffect(() => {
-    if (playing === null) return;
-    const f = playing === REF ? refFreq : freqs[Number(playing.slice(1))];
-    if (f !== undefined) getPlayer().retune(playing, f);
-  }, [playing, freqs, refFreq, getPlayer]);
+    if (playingId === null) return;
+    const f = playingId === REF ? refFreq : freqs[Number(playingId.slice(1))];
+    if (f !== undefined) getPlayer().retune(playingId, f);
+  }, [playingId, freqs, refFreq, getPlayer]);
 
   // A different instrument has different (and possibly a different number of) strings.
   const selectTuning = (id: string) => {
@@ -221,6 +239,7 @@ export function Tuner() {
   const currentMidi = midis[shown];
   const currentFreq = freqs[shown];
   const sounding = playing !== null;
+  const playingRef = playingId === REF;
   const a4Cents = centsBetween(settings.a4, A4_DEFAULT);
 
   return (
@@ -293,20 +312,36 @@ export function Tuner() {
           <ol className="tuner-strings">
             {tuning.notes.map((_, i) => {
               const id = stringVoice(i);
-              const on = playing === id;
+              const voice = playing !== null && playing.id === id ? playing : null;
+              const on = voice !== null;
               const offset = settings.offsets[i] ?? 0;
+              const what = voice?.mode === 'drone' ? 'Droning' : 'Ringing';
+              // A drone's halo breathes on until it is switched off; a plucked one dies away
+              // over the note's own ring. That halo has to start over on every strike, and a
+              // re-render with the same animation-name doesn't restart one — alternating
+              // between two identical keyframes is what makes each repeat land afresh.
+              const halo = voice === null ? '' : voice.mode === 'drone' ? 'drone' : `pluck ring-${voice.strike % 2}`;
               return (
-                <li key={`${tuning.id}:${stringNumber(tuning, i)}`} className={`tuner-string ${on ? 'on' : ''} ${current === i ? 'current' : ''}`}>
+                <li
+                  key={`${tuning.id}:${stringNumber(tuning, i)}`}
+                  className={`tuner-string ${on ? `on ${halo}` : ''} ${current === i ? 'current' : ''}`}
+                  style={voice !== null && Number.isFinite(voice.secs) ? ({ '--ring': `${voice.secs}s` } as CSSProperties) : undefined}
+                >
                   <button
                     type="button"
                     className="string-btn"
                     onClick={() => toggleString(i)}
                     aria-pressed={on}
-                    title={`${ordinal(stringNumber(tuning, i))} string — ${noteName(midis[i])}, ${fmtHz(freqs[i])} Hz (key ${stringNumber(tuning, i)})`}
+                    title={
+                      on
+                        ? `${what} — click to stop (key ${stringNumber(tuning, i)})`
+                        : `${ordinal(stringNumber(tuning, i))} string — ${noteName(midis[i])}, ${fmtHz(freqs[i])} Hz (key ${stringNumber(tuning, i)})`
+                    }
                   >
                     <span className="string-num">{ordinal(stringNumber(tuning, i))}</span>
                     <span className="string-note">{noteName(midis[i])}</span>
                     <span className="string-hz">{fmtHz(freqs[i])} Hz</span>
+                    {on && <span className="string-state">{what}</span>}
                   </button>
                   <div className="string-tweak">
                     <button
@@ -361,7 +396,7 @@ export function Tuner() {
                   onChange={(mode) => update({ mode })}
                   options={[
                     { value: 'drone' as const, label: 'Drone', title: 'Sounds until you click the string again' },
-                    { value: 'pluck' as const, label: 'Pluck', title: 'Struck once and left to ring out, like a plucked string' },
+                    { value: 'pluck' as const, label: 'Pluck', title: 'Struck once and left to ring out, like a plucked string; click it again to stop it early' },
                   ]}
                 />
               </div>
@@ -467,8 +502,8 @@ export function Tuner() {
                       );
                     })}
                   </div>
-                  <button type="button" className={`chip ${playing === REF ? 'on' : ''}`} onClick={() => (playing === REF ? stopVoice(REF) : startVoice(REF, refFreq))}>
-                    {playing === REF ? 'Stop' : 'Play'} {noteName(settings.refMidi)}
+                  <button type="button" className={`chip ${playingRef ? 'on' : ''}`} onClick={() => (playingRef ? stopVoice(REF) : startVoice(REF, refFreq))}>
+                    {playingRef ? 'Stop' : 'Play'} {noteName(settings.refMidi)}
                   </button>
                   <button
                     type="button"
@@ -503,7 +538,7 @@ export function Tuner() {
                   <dt>
                     <kbd>1</kbd>…<kbd>9</kbd>
                   </dt>
-                  <dd>Play that string, by string number</dd>
+                  <dd>Play that string by number — again to stop it</dd>
                 </div>
                 <div className="shortcut">
                   <dt>

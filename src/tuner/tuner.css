@@ -57,6 +57,7 @@
 }
 .tuner-string { display: flex; flex-direction: column; align-items: stretch; gap: 4px; }
 .string-btn {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -78,12 +79,38 @@
   background: rgba(245, 165, 36, 0.12);
   border-color: var(--accent);
   color: var(--accent);
-  animation: tuner-pulse 1.6s ease-in-out infinite;
 }
 .tuner-string.on .string-num,
 .tuner-string.on .string-hz { color: inherit; opacity: 0.8; }
+/* A drone holds steady until it is switched off, so its halo breathes on forever... */
+.tuner-string.drone .string-btn { animation: tuner-pulse 1.6s ease-in-out infinite; }
+/* ...while a pluck is dying away the whole time it is lit, so its halo dies away with it,
+   over `--ring` — the ring the tone player actually scheduled for that pitch. The two
+   keyframes are identical: auto-repeat strikes the same string over and over, and only a
+   change of animation-name restarts an animation, so consecutive strikes alternate. */
+.tuner-string.ring-0 .string-btn { animation: tuner-ring-a var(--ring, 8s) ease-out forwards; }
+.tuner-string.ring-1 .string-btn { animation: tuner-ring-b var(--ring, 8s) ease-out forwards; }
+/* The word in the corner says which of the two it is, without moving the note or the Hz. */
+.string-state {
+  position: absolute;
+  top: 5px;
+  right: 6px;
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  opacity: 0.75;
+}
 @keyframes tuner-pulse {
   50% { box-shadow: 0 0 0 4px rgba(245, 165, 36, 0.12); }
+}
+@keyframes tuner-ring-a {
+  from { box-shadow: 0 0 0 5px rgba(245, 165, 36, 0.18); }
+  to { box-shadow: 0 0 0 0 rgba(245, 165, 36, 0); }
+}
+@keyframes tuner-ring-b {
+  from { box-shadow: 0 0 0 5px rgba(245, 165, 36, 0.18); }
+  to { box-shadow: 0 0 0 0 rgba(245, 165, 36, 0); }
 }
 @media (prefers-reduced-motion: reduce) {
   .string-btn { transition: none; }
