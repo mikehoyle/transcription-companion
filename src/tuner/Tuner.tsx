@@ -315,7 +315,6 @@ export function Tuner() {
               const voice = playing !== null && playing.id === id ? playing : null;
               const on = voice !== null;
               const offset = settings.offsets[i] ?? 0;
-              const what = voice?.mode === 'drone' ? 'Droning' : 'Ringing';
               // A drone's halo breathes on until it is switched off; a plucked one dies away
               // over the note's own ring. That halo has to start over on every strike, and a
               // re-render with the same animation-name doesn't restart one — alternating
@@ -332,16 +331,11 @@ export function Tuner() {
                     className="string-btn"
                     onClick={() => toggleString(i)}
                     aria-pressed={on}
-                    title={
-                      on
-                        ? `${what} — click to stop (key ${stringNumber(tuning, i)})`
-                        : `${ordinal(stringNumber(tuning, i))} string — ${noteName(midis[i])}, ${fmtHz(freqs[i])} Hz (key ${stringNumber(tuning, i)})`
-                    }
+                    title={`${ordinal(stringNumber(tuning, i))} string — ${noteName(midis[i])}, ${fmtHz(freqs[i])} Hz (key ${stringNumber(tuning, i)})${on ? ' · click to stop' : ''}`}
                   >
                     <span className="string-num">{ordinal(stringNumber(tuning, i))}</span>
                     <span className="string-note">{noteName(midis[i])}</span>
                     <span className="string-hz">{fmtHz(freqs[i])} Hz</span>
-                    {on && <span className="string-state">{what}</span>}
                   </button>
                   <div className="string-tweak">
                     <button

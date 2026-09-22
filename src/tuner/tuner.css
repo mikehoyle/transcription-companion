@@ -57,7 +57,6 @@
 }
 .tuner-string { display: flex; flex-direction: column; align-items: stretch; gap: 4px; }
 .string-btn {
-  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -90,17 +89,6 @@
    change of animation-name restarts an animation, so consecutive strikes alternate. */
 .tuner-string.ring-0 .string-btn { animation: tuner-ring-a var(--ring, 8s) ease-out forwards; }
 .tuner-string.ring-1 .string-btn { animation: tuner-ring-b var(--ring, 8s) ease-out forwards; }
-/* The word in the corner says which of the two it is, without moving the note or the Hz. */
-.string-state {
-  position: absolute;
-  top: 5px;
-  right: 6px;
-  font-size: 9px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
-  opacity: 0.75;
-}
 @keyframes tuner-pulse {
   50% { box-shadow: 0 0 0 4px rgba(245, 165, 36, 0.12); }
 }
