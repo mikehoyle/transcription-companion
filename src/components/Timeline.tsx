@@ -1,6 +1,6 @@
 import { useEffect, useRef, type RefObject } from 'react';
 import { engine } from '../audio/engine';
-import { formatChord, noteName } from '../audio/music';
+import { noteName } from '../audio/music';
 import * as c from '../controller';
 import { markerColor, store, useStore, type AppState } from '../store';
 import { fmtTime } from '../util';
@@ -8,7 +8,6 @@ import { fitCanvas, useAnimationFrame } from './controls';
 
 export const GUTTER = 44;
 const RULER_H = 20;
-const CHORD_H = 22;
 
 const COL = {
   bg: '#101217',
@@ -25,8 +24,6 @@ const COL = {
   loopEdgeOff: '#80776a',
   bar: 'rgba(255,255,255,0.20)',
   beat: 'rgba(255,255,255,0.07)',
-  chordBg: '#1a1e27',
-  chordText: '#e6e8ee',
   hover: 'rgba(255,255,255,0.35)',
 };
 
@@ -362,34 +359,6 @@ function drawMarkers(ctx: CanvasRenderingContext2D, s: AppState, w: number, top:
   });
 }
 
-function drawChords(ctx: CanvasRenderingContext2D, s: AppState, w: number, top: number) {
-  const m = mapping(s, w);
-  ctx.fillStyle = COL.gutter;
-  ctx.fillRect(0, top, w, CHORD_H);
-  ctx.fillStyle = COL.ruler;
-  ctx.font = '10px system-ui, sans-serif';
-  ctx.fillText('Chords', 4, top + 14);
-  if (s.analysis.status === 'running') {
-    ctx.fillText(`analysing… ${Math.round(s.analysis.progress * 100)}%`, GUTTER + 6, top + 14);
-    return;
-  }
-  const shift = pitchShift(s) + s.transposeDisplay;
-  ctx.font = '600 12px system-ui, sans-serif';
-  for (const seg of s.analysis.chords) {
-    if (seg.end < s.view.start || seg.start > s.view.end) continue;
-    const x0 = Math.max(GUTTER, m.x(seg.start));
-    const x1 = Math.min(w, m.x(seg.end));
-    if (x1 - x0 < 2) continue;
-    ctx.fillStyle = COL.chordBg;
-    ctx.fillRect(x0 + 1, top + 2, x1 - x0 - 2, CHORD_H - 4);
-    const name = formatChord(seg, shift);
-    if (ctx.measureText(name).width < x1 - x0 - 6) {
-      ctx.fillStyle = COL.chordText;
-      ctx.fillText(name, x0 + 4, top + 15);
-    }
-  }
-}
-
 function drawPlayhead(ctx: CanvasRenderingContext2D, s: AppState, w: number, h: number, pos: number, hover: number | null) {
   const m = mapping(s, w);
   if (hover !== null) {
@@ -479,7 +448,6 @@ function renderRollLayer(ctx: CanvasRenderingContext2D, s: AppState, w: number, 
 export function Timeline() {
   const hasFile = useStore((s) => s.file !== null);
   const showRoll = useStore((s) => s.showRoll);
-  const showNotes = useStore((s) => s.showNotes);
   const duration = useStore((s) => s.file?.duration ?? 0);
   const markerCount = useStore((s) => s.markers.length);
   const overviewRef = useRef<HTMLCanvasElement>(null);
@@ -563,34 +531,29 @@ export function Timeline() {
       drawPlayhead(ctx, full, w, h, pos, null);
     }
 
-    // ---- waveform + ruler + markers + chords
+    // ---- waveform + ruler + markers
     const wv = waveRef.current;
     if (wv) {
       const [w, h, dpr] = fitCanvas(wv);
       const ctx = wv.getContext('2d')!;
       const waveTop = RULER_H;
-      // The chord row shares the toggle with the notes panel, and the waveform takes
-      // back its strip when it is off.
-      const chordH = st.showNotes ? CHORD_H : 0;
-      const waveBottom = h - chordH;
-      const layer = cachedLayer(waveLayer, `${wv.width}x${wv.height}:${st.file!.name}:${st.view.start}:${st.view.end}:${chordH}`, wv.width, wv.height, (lc) => {
+      const layer = cachedLayer(waveLayer, `${wv.width}x${wv.height}:${st.file!.name}:${st.view.start}:${st.view.end}`, wv.width, wv.height, (lc) => {
         lc.fillStyle = COL.bg;
         lc.fillRect(0, 0, wv.width, wv.height);
-        drawWaveLayer(lc, st, w, waveTop + 16, waveBottom - waveTop - 16, dpr);
+        drawWaveLayer(lc, st, w, waveTop + 16, h - waveTop - 16, dpr);
       });
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.drawImage(layer, 0, 0);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
       drawRuler(ctx, st, w);
-      if (st.gridVisible) drawGrid(ctx, st, w, 0, waveBottom, true);
-      drawLoop(ctx, st, w, waveTop, waveBottom);
-      drawMarkers(ctx, st, w, waveTop, waveBottom, true);
-      if (st.showNotes) drawChords(ctx, st, w, waveBottom);
+      if (st.gridVisible) drawGrid(ctx, st, w, 0, h, true);
+      drawLoop(ctx, st, w, waveTop, h);
+      drawMarkers(ctx, st, w, waveTop, h, true);
       ctx.fillStyle = COL.gutter;
-      ctx.fillRect(0, RULER_H, GUTTER, waveBottom - RULER_H);
+      ctx.fillRect(0, RULER_H, GUTTER, h - RULER_H);
       ctx.fillStyle = COL.ruler;
       ctx.font = '10px system-ui, sans-serif';
-      ctx.fillText('Wave', 4, (waveTop + waveBottom) / 2 + 3);
+      ctx.fillText('Wave', 4, (waveTop + h) / 2 + 3);
       drawPlayhead(ctx, st, w, h, pos, hover.current);
       if (hover.current !== null) {
         const m = mapping(st, w);
@@ -599,9 +562,9 @@ export function Timeline() {
         const tw = ctx.measureText(label).width + 6;
         const hx = Math.min(w - tw, m.x(hover.current) + 4);
         ctx.fillStyle = 'rgba(0,0,0,0.7)';
-        ctx.fillRect(hx, waveBottom - 16, tw, 14);
+        ctx.fillRect(hx, h - 16, tw, 14);
         ctx.fillStyle = '#fff';
-        ctx.fillText(label, hx + 3, waveBottom - 6);
+        ctx.fillText(label, hx + 3, h - 6);
       }
     }
 
@@ -660,7 +623,7 @@ export function Timeline() {
   // The canvases are the app's main output but have no DOM of their own, so each one
   // describes what it draws. The descriptions deliberately leave out the playhead and
   // visible window, which change many times a second; AnalysisStatus announces the
-  // things worth hearing about (key, tempo, the chord under a stopped playhead).
+  // things worth hearing about (key, tempo).
   return (
     <section className="timeline" aria-label="Timeline">
       <canvas
@@ -673,7 +636,7 @@ export function Timeline() {
         ref={waveRef}
         className="tl-wave"
         role="img"
-        aria-label={`Waveform with time ruler, loop region, ${showNotes ? 'detected chords and ' : ''}${markerCount === 1 ? '1 marker' : `${markerCount} markers`}. Click to move the playhead, drag to select a loop.`}
+        aria-label={`Waveform with time ruler, loop region and ${markerCount === 1 ? '1 marker' : `${markerCount} markers`}. Click to move the playhead, drag to select a loop.`}
       />
       {showRoll && (
         <canvas

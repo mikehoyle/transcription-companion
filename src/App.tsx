@@ -207,7 +207,7 @@ function Welcome() {
         </li>
         <li>
           <h2>Note & chord guessing</h2>
-          <span>Pitch spectrum on a keyboard, chord names, pitch roll & chord timeline.</span>
+          <span>Pitch spectrum on a keyboard, chord names and a pitch roll.</span>
         </li>
         <li>
           <h2>Tempo, beats & key</h2>
