@@ -22,7 +22,7 @@ export function ClickTrackDialog() {
   const [on, setOn] = useState(false);
   const [volume, setVolume] = useState(0.8);
   const [noiseOn, setNoiseOn] = useState(false);
-  const [noiseVolume, setNoiseVolume] = useState(0.3);
+  const [noiseVolume, setNoiseVolume] = useState(0.12);
   const noiseTipId = useId();
   const [lit, setLit] = useState<number | null>(null);
   // Counts every click, bar or no bar, so the pendulum can swing one way then the other.

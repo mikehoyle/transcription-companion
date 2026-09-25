@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { clicksUntil } from './clickTrack';
+import { brownNoise, clicksUntil } from './clickTrack';
 
 describe('clicksUntil', () => {
   it('spaces clicks one beat apart and accents the start of each bar', () => {
@@ -32,5 +32,29 @@ describe('clicksUntil', () => {
     const { clicks, next } = clicksUntil({ time: 5, beat: 2 }, 4.9, 100, 4);
     expect(clicks).toEqual([]);
     expect(next).toEqual({ time: 5, beat: 2 });
+  });
+});
+
+describe('brownNoise', () => {
+  const data = brownNoise(48000);
+
+  it('has the RMS of full-range white noise', () => {
+    const rms = Math.sqrt(data.reduce((a, v) => a + v * v, 0) / data.length);
+    expect(rms).toBeCloseTo(1 / Math.sqrt(3), 5);
+  });
+
+  it('loops without a jump at the seam', () => {
+    const typicalStep = data.slice(1).reduce((a, v, i) => a + Math.abs(v - data[i]), 0) / (data.length - 1);
+    expect(Math.abs(data[0] - data[data.length - 1])).toBeLessThan(typicalStep * 5);
+  });
+
+  it('is darker than white noise: neighbouring samples move together', () => {
+    let num = 0;
+    let den = 0;
+    for (let i = 1; i < data.length; i++) {
+      num += data[i] * data[i - 1];
+      den += data[i] * data[i];
+    }
+    expect(num / den).toBeGreaterThan(0.9);
   });
 });
