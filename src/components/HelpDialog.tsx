@@ -53,7 +53,8 @@ export function HelpDialog() {
               Tempo and key are detected automatically; correct them with <b>Tap</b> and <b>Set bar 1 here</b> in the Tempo panel.
             </li>
             <li>
-              <b>Speed trainer</b>: enable a loop, set start and target speed — the speed steps up after each N repetitions.
+              <b>Speed trainer</b>: enable a loop, set start and target speed — the speed steps up after each N repetitions. It switches off if you change speed yourself, or turn
+              off, move or leave the loop.
             </li>
             <li>
               <b>Karaoke</b> mode cancels centre-panned sound (often lead vocal); try <b>Left/Right only</b> for hard-panned parts.
