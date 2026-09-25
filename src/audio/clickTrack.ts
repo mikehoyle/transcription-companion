@@ -39,11 +39,18 @@ export function clicksUntil(next: { time: number; beat: number }, until: number,
 
 const LOOKAHEAD = 0.12; // seconds of clicks scheduled ahead of the audio clock
 const TICK_MS = 25;
+/** Full volume on the noise slider is still only a quiet hiss under the clicks. */
+const NOISE_MAX_GAIN = 0.05;
+const NOISE_SECONDS = 2;
 
 export class ClickTrack {
   private ctx: AudioContext | null = null;
   private gain: GainNode | null = null;
   private volume = 0.8;
+  private noiseGain: GainNode | null = null;
+  private noiseSource: AudioBufferSourceNode | null = null;
+  private noiseOn = false;
+  private noiseVolume = 0.3;
   private timer: ReturnType<typeof setInterval> | null = null;
   private next = { time: 0, beat: 0 };
   private bpm = 120;
@@ -71,6 +78,14 @@ export class ClickTrack {
     if (this.gain) this.gain.gain.value = volume;
   }
 
+  /** A faint, steady hiss that plays alongside the clicks while the metronome runs; `volume` 0–1. */
+  setNoise(on: boolean, volume: number) {
+    this.noiseOn = on;
+    this.noiseVolume = volume;
+    if (this.noiseGain) this.noiseGain.gain.value = volume * NOISE_MAX_GAIN;
+    this.syncNoise();
+  }
+
   /** Must be called from a user gesture the first time: that is what lets the context make sound. */
   start() {
     if (this.timer) return;
@@ -84,11 +99,13 @@ export class ClickTrack {
     this.next = { time: this.ctx.currentTime + 0.05, beat: 0 };
     this.tick();
     this.timer = setInterval(() => this.tick(), TICK_MS);
+    this.syncNoise();
   }
 
   stop() {
     if (this.timer) clearInterval(this.timer);
     this.timer = null;
+    this.syncNoise();
   }
 
   dispose() {
@@ -96,6 +113,32 @@ export class ClickTrack {
     void this.ctx?.close();
     this.ctx = null;
     this.gain = null;
+    this.noiseGain = null;
+  }
+
+  /** Noise sounds only while the clicks do, and only when switched on. */
+  private syncNoise() {
+    const { ctx } = this;
+    if (!ctx || !this.running || !this.noiseOn) {
+      this.noiseSource?.stop();
+      this.noiseSource = null;
+      return;
+    }
+    if (this.noiseSource) return;
+    if (!this.noiseGain) {
+      this.noiseGain = ctx.createGain();
+      this.noiseGain.connect(ctx.destination);
+    }
+    this.noiseGain.gain.value = this.noiseVolume * NOISE_MAX_GAIN;
+    const buffer = ctx.createBuffer(1, Math.round(ctx.sampleRate * NOISE_SECONDS), ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+    const src = ctx.createBufferSource();
+    src.buffer = buffer;
+    src.loop = true;
+    src.connect(this.noiseGain);
+    src.start();
+    this.noiseSource = src;
   }
 
   private tick() {

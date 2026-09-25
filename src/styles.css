@@ -342,6 +342,17 @@ dialog.click-track h2 { margin: 0; font-size: 16px; }
 .click-track-row { display: flex; align-items: center; justify-content: center; gap: 8px; }
 .click-track-body .bpm-box .numfield input { font-size: 28px; text-align: center; }
 .click-track-body .hint { text-align: center; }
+.noise-row { display: flex; align-items: center; gap: 6px; }
+.info-tip { position: relative; display: inline-flex; }
+.info-tip-btn { display: inline-flex; padding: 2px; border: 0; background: none; color: var(--muted); cursor: help; border-radius: 50%; }
+.info-tip-btn:hover, .info-tip-btn:focus-visible { color: var(--text); }
+.info-tip-text {
+  position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); z-index: 10;
+  width: max-content; max-width: 240px; padding: 6px 9px; border-radius: 6px;
+  background: var(--surface-3); color: var(--text); border: 1px solid var(--border); font-size: 12px; line-height: 1.4;
+  visibility: hidden; opacity: 0; transition: opacity 0.12s; pointer-events: none;
+}
+.info-tip:hover .info-tip-text, .info-tip-btn:focus-visible + .info-tip-text { visibility: visible; opacity: 1; }
 .beat-dots { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; min-height: 16px; }
 .beat-dot { width: 14px; height: 14px; border-radius: 50%; background: var(--surface-3); border: 1px solid var(--border); }
 .beat-dot.accent { border-color: var(--accent); }
