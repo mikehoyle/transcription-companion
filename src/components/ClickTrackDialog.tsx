@@ -2,7 +2,7 @@ import { type CSSProperties, useEffect, useId, useRef, useState } from 'react';
 import { ClickTrack } from '../audio/clickTrack';
 import * as c from '../controller';
 import { store, useStore } from '../store';
-import { NumberField, Slider } from './controls';
+import { NumberField, Slider, Toggle } from './controls';
 import { Icon } from './Icon';
 
 const MIN_BPM = 20;
@@ -21,6 +21,9 @@ export function ClickTrackDialog() {
   const [beats, setBeats] = useState(4);
   const [on, setOn] = useState(false);
   const [volume, setVolume] = useState(0.8);
+  const [noiseOn, setNoiseOn] = useState(false);
+  const [noiseVolume, setNoiseVolume] = useState(0.3);
+  const noiseTipId = useId();
   const [lit, setLit] = useState<number | null>(null);
   // Counts every click, bar or no bar, so the pendulum can swing one way then the other.
   const [clicks, setClicks] = useState(0);
@@ -43,6 +46,10 @@ export function ClickTrackDialog() {
   useEffect(() => {
     track.current?.setVolume(volume);
   }, [volume]);
+
+  useEffect(() => {
+    track.current?.setNoise(noiseOn, noiseVolume);
+  }, [noiseOn, noiseVolume]);
 
   useEffect(() => {
     const d = ref.current;
@@ -169,6 +176,32 @@ export function ClickTrackDialog() {
           onChange={(v) => setVolume(v / 100)}
           format={(v) => `${Math.round(v)}%`}
         />
+
+        <div className="noise-row">
+          <Toggle checked={noiseOn} onChange={setNoiseOn}>
+            White noise
+          </Toggle>
+          <span className="info-tip">
+            <button type="button" className="info-tip-btn" aria-label="About white noise" aria-describedby={noiseTipId}>
+              <Icon name="info" size={15} />
+            </button>
+            <span role="tooltip" id={noiseTipId} className="info-tip-text">
+              Useful for wake-on-signal bluetooth devices which are unreliable with an isolated click track
+            </span>
+          </span>
+        </div>
+        {noiseOn && (
+          <Slider
+            label="Noise volume"
+            ariaLabel="White noise volume"
+            value={noiseVolume * 100}
+            min={0}
+            max={100}
+            step={1}
+            onChange={(v) => setNoiseVolume(v / 100)}
+            format={(v) => `${Math.round(v)}%`}
+          />
+        )}
       </div>
     </dialog>
   );

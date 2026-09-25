@@ -135,7 +135,9 @@ export function Tuner() {
 
   // ---------------------------------------------------------------- settings plumbing
   useEffect(() => {
-    setSettings(loadSettings());
+    // Auto-repeat isn't restored: stopping a note switches it off, and that shouldn't
+    // follow the visitor to their next session. Every visit starts with it on.
+    setSettings({ ...loadSettings(), autoRepeat: DEFAULT_SETTINGS.autoRepeat });
     setLoaded(true);
   }, []);
 

@@ -20,6 +20,7 @@ const PATHS: Record<string, string> = {
   trash: 'M9 3h6l1 2h4v2H4V5h4zm-3 6h12l-1 12H7z',
   roll: 'M3 5h18v2H3zm0 4h12v2H3zm0 4h16v2H3zm0 4h9v2H3z',
   notes: 'M9 3h11v13.5a3 3 0 11-2-2.83V7h-7v11.5a3 3 0 11-2-2.83z',
+  info: 'M12 2a10 10 0 110 20 10 10 0 010-20zm0 2a8 8 0 100 16 8 8 0 000-16zm-1 6h2v7h-2zm0-3.5h2v2h-2z',
   tuner: 'M7 2h2v10h6V2h2v10a5 5 0 01-4 4.9V22h-2v-5.1A5 5 0 017 12z',
 };
 
