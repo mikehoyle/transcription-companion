@@ -39,9 +39,44 @@ export function clicksUntil(next: { time: number; beat: number }, until: number,
 
 const LOOKAHEAD = 0.12; // seconds of clicks scheduled ahead of the audio clock
 const TICK_MS = 25;
-/** Full volume on the noise slider is still only a quiet hiss under the clicks. */
-const NOISE_MAX_GAIN = 0.05;
+/**
+ * The noise is only there to keep a sleepy Bluetooth speaker awake, so even full volume on
+ * its slider is quiet.
+ */
+const NOISE_MAX_GAIN = 0.0075;
 const NOISE_SECONDS = 2;
+
+/**
+ * Brown-ish noise: white noise through a leaky integrator, which rolls off the hiss above a
+ * few hundred Hz. The drift is levelled out so the buffer's two ends meet and it loops
+ * without a click, and it's scaled to the RMS of full-range white noise (1/√3).
+ */
+export function brownNoise(length: number, random: () => number = Math.random): Float32Array {
+  const data = new Float32Array(length);
+  let last = 0;
+  for (let i = 0; i < length; i++) {
+    last = (last + 0.02 * (random() * 2 - 1)) / 1.02;
+    data[i] = last;
+  }
+  if (length < 2) return data;
+  const drift = data[length - 1] - data[0];
+  let mean = 0;
+  for (let i = 0; i < length; i++) {
+    data[i] -= (drift * i) / (length - 1);
+    mean += data[i] / length;
+  }
+  let sq = 0;
+  for (let i = 0; i < length; i++) {
+    data[i] -= mean;
+    sq += data[i] * data[i];
+  }
+  const rms = Math.sqrt(sq / length);
+  if (rms > 0) {
+    const k = 1 / Math.sqrt(3) / rms;
+    for (let i = 0; i < length; i++) data[i] *= k;
+  }
+  return data;
+}
 
 export class ClickTrack {
   private ctx: AudioContext | null = null;
@@ -50,7 +85,7 @@ export class ClickTrack {
   private noiseGain: GainNode | null = null;
   private noiseSource: AudioBufferSourceNode | null = null;
   private noiseOn = false;
-  private noiseVolume = 0.3;
+  private noiseVolume = 0.12;
   private timer: ReturnType<typeof setInterval> | null = null;
   private next = { time: 0, beat: 0 };
   private bpm = 120;
@@ -131,8 +166,7 @@ export class ClickTrack {
     }
     this.noiseGain.gain.value = this.noiseVolume * NOISE_MAX_GAIN;
     const buffer = ctx.createBuffer(1, Math.round(ctx.sampleRate * NOISE_SECONDS), ctx.sampleRate);
-    const data = buffer.getChannelData(0);
-    for (let i = 0; i < data.length; i++) data[i] = Math.random() * 2 - 1;
+    buffer.getChannelData(0).set(brownNoise(buffer.length));
     const src = ctx.createBufferSource();
     src.buffer = buffer;
     src.loop = true;
