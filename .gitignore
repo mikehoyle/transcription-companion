@@ -5,3 +5,4 @@ public/ffmpeg
 *.log
 .DS_Store
 .claude/launch.json
+*.tsbuildinfo
