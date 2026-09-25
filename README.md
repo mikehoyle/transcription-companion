@@ -18,7 +18,7 @@ exported on your machine, and nothing is uploaded or persisted. The container on
 | **Count-in & metronome** | Audible count-in before playing and/or before each loop repeat; metronome click that follows the beat grid at any speed. |
 | **Tempo & key** | Automatic BPM & beat-phase detection, tap tempo, halve/double, “set bar 1 here”, beat grid with bar numbers, key estimation. |
 | **Note & chord guessing** | Live pitch spectrum at the playhead drawn on an 88-key keyboard with guessed notes and chord name (incl. slash chords); click keys for a reference tone. Transposing-instrument display (B♭, E♭, F, guitar). |
-| **Pitch roll & chord lane** | Whole-song constant-semitone spectrogram aligned with the waveform, plus an automatic chord timeline. |
+| **Pitch roll** | Whole-song constant-semitone spectrogram aligned with the waveform. |
 | **Isolate parts** | 6-band parametric EQ with draggable response curve, high/low-pass filters, instrument presets; stereo / mono / left / right / swap / karaoke (centre cancel, with bass restore); balance & volume. |
 | **Markers** | Tap markers while listening, rename, drag, jump with 1–9, loop from a marker to the next. |
 | **Tuner** | A separate page (`/tuner/`, popped out from the tuning fork in the header): reference tones for 27 tunings across guitar, bass, ukulele, violin, viola, cello, double bass, mandolin and banjo. Pluck or drone, three timbres, per-string semitone tweaks, octave shift, hands-free auto-repeat (on by default, and it waits for your first note), any chromatic note, and A4 adjustable from 415 to 466 Hz. One note sounds at a time, so a new pick cuts whatever is still ringing. It plays tones only — no microphone. |
