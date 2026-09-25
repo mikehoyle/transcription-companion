@@ -35,21 +35,6 @@ function handleFiles(files: FileList | null) {
   })();
 }
 
-/**
- * Asks for the tuner in a small window of its own, beside the player. Whether that happens is
- * the browser's call — most now open a tab instead, and popup blockers may refuse outright —
- * so the wording promises nothing more than opening it. Modified and middle clicks are left
- * alone, and if `open` is refused the link just follows into a new tab.
- */
-function popOutTuner(e: React.MouseEvent<HTMLAnchorElement>) {
-  if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-  const win = window.open(e.currentTarget.href, 'lbe-tuner', 'popup,width=560,height=880');
-  if (win) {
-    e.preventDefault();
-    win.focus();
-  }
-}
-
 function Header() {
   const file = useStore((s) => s.file);
   const hasLoop = useStore((s) => s.loop.end - s.loop.start > 0.02);
@@ -143,7 +128,6 @@ function Header() {
           rel="noopener"
           title="Tuner — reference tones for guitar, bass, ukulele, violin, mandolin and banjo"
           aria-label="Open the tuner"
-          onClick={popOutTuner}
         >
           <Icon name="tuner" size={20} />
         </a>
