@@ -57,9 +57,9 @@ export function Tuner() {
   /** The string the readout is showing; starts on the lowest-numbered one. */
   const [current, setCurrent] = useState(0);
   /**
-   * Auto-repeat is on out of the box, but it must not sound anything until the visitor has
-   * actually played a note: firing on load would light a string up while the browser is
-   * still refusing audio without a gesture.
+   * Auto-repeat only runs once the visitor has played a note: firing on load would light a
+   * string up while the browser is still refusing audio without a gesture. Stopping a note
+   * disarms it again — the repeat pauses until the next note, but the setting stays as it is.
    */
   const [armed, setArmed] = useState(false);
 
@@ -76,8 +76,8 @@ export function Tuner() {
 
   // Read by the auto-cycle timer and the key handler, which must not be torn down and
   // rebuilt every time a setting changes.
-  const live = useRef({ freqs, settings, tuning, current, repeating });
-  live.current = { freqs, settings, tuning, current, repeating };
+  const live = useRef({ freqs, settings, tuning, current, repeating, armed });
+  live.current = { freqs, settings, tuning, current, repeating, armed };
 
   const update = useCallback((patch: Partial<TunerSettings>) => setSettings((s) => ({ ...s, ...patch })), []);
 
@@ -103,23 +103,25 @@ export function Tuner() {
   const stopAll = useCallback(() => {
     getPlayer().stopAll();
     setPlaying(null);
-    update({ autoRepeat: false });
-  }, [update, getPlayer]);
+    setArmed(false);
+  }, [getPlayer]);
 
   const toggleString = useCallback(
     (i: number) => {
       const id = stringVoice(i);
+      const { repeating: r, armed: a, current: cur } = live.current;
       setCurrent(i);
       // Clicking the string that is sounding switches it off, drone or pluck alike: the
       // highlight says it is still going, so the click that lands on it is what has to stop
-      // it. Auto-repeat goes off with it — left running, its timer would strike the string
-      // again a moment later and the click would look ignored.
-      if (getPlayer().isPlaying(id)) {
+      // it. The repeat pauses with it — left running, its timer would strike the string
+      // again a moment later and the click would look ignored. The string being repeated
+      // counts as sounding even in the quiet between strikes.
+      if (getPlayer().isPlaying(id) || (r && a && cur === i)) {
         stopVoice(id);
-        if (live.current.repeating) update({ autoRepeat: false });
+        setArmed(false);
       } else startVoice(id, live.current.freqs[i]);
     },
-    [startVoice, stopVoice, getPlayer, update],
+    [startVoice, stopVoice, getPlayer],
   );
 
   // A plucked note stops by itself; drop its highlight when it does.
@@ -135,9 +137,7 @@ export function Tuner() {
 
   // ---------------------------------------------------------------- settings plumbing
   useEffect(() => {
-    // Auto-repeat isn't restored: stopping a note switches it off, and that shouldn't
-    // follow the visitor to their next session. Every visit starts with it on.
-    setSettings({ ...loadSettings(), autoRepeat: DEFAULT_SETTINGS.autoRepeat });
+    setSettings(loadSettings());
     setLoaded(true);
   }, []);
 
@@ -282,7 +282,7 @@ export function Tuner() {
             </div>
           </div>
           <div className="tuner-readout-actions">
-            <button type="button" className="btn" onClick={stopAll} disabled={!sounding && !repeating} title="Silence everything (Space)">
+            <button type="button" className="btn" onClick={stopAll} disabled={!sounding && !(repeating && armed)} title="Silence everything (Space)">
               <Icon name="pause" size={16} /> Stop
             </button>
           </div>
