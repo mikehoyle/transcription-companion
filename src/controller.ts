@@ -194,6 +194,8 @@ export const togglePlay = () => engine.toggle();
 export const pause = () => engine.pause();
 
 export function seek(t: number) {
+  const { trainer, loop } = store.get();
+  if (trainer.enabled && (t < loop.start || t > loop.end)) stopTrainer();
   engine.seek(clamp(t, 0, duration()));
   if (!store.get().playing) store.set({ playStart: clamp(t, 0, duration()) });
 }
@@ -226,6 +228,27 @@ export function nudgeCents(delta: number) {
 }
 
 export const resetSpeedPitch = () => store.set({ rate: 1, semitones: 0, cents: 0 });
+
+// ------------------------------------------------------------ speed trainer
+
+/** Turn the speed trainer on (starting at its start speed, looping) or off. */
+export function setTrainerEnabled(enabled: boolean) {
+  if (!enabled) return stopTrainer();
+  if (!store.get().loop.enabled) toggleLoop();
+  // Rate and trainer change together, so the guard below doesn't read it as a manual speed change.
+  store.set((s) => ({ trainer: { ...s.trainer, enabled: true, rep: 0 }, rate: s.trainer.startRate }));
+}
+
+const stopTrainer = () => store.set((s) => ({ trainer: { ...s.trainer, enabled: false, rep: 0 } }));
+
+// The trainer only makes sense while it's driving the loop: switch it off as soon as the user
+// takes over — changing speed themselves, or turning off or moving the loop.
+store.subscribe((s, p) => {
+  if (!s.trainer.enabled || !p.trainer.enabled || s.file !== p.file) return;
+  const manualRate = s.rate !== p.rate && s.trainer === p.trainer;
+  const loopLeft = !s.loop.enabled || s.loop.start !== p.loop.start || s.loop.end !== p.loop.end;
+  if (manualRate || loopLeft) stopTrainer();
+});
 
 // ------------------------------------------------------------ loops
 

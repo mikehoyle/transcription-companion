@@ -252,6 +252,45 @@ describe('loops', () => {
     expect(store.get().trainer.rep).toBe(0);
   });
 
+  describe('speed trainer', () => {
+    beforeEach(() => {
+      c.setLoop(10, 20);
+      c.setTrainerEnabled(true);
+    });
+
+    it('starts at its start speed with the loop on', () => {
+      expect(store.get().trainer.enabled).toBe(true);
+      expect(store.get().rate).toBe(store.get().trainer.startRate);
+      expect(store.get().loop.enabled).toBe(true);
+    });
+
+    it('stays on while it steps the speed itself', () => {
+      store.set((s) => ({ rate: s.rate + 0.05, trainer: { ...s.trainer, rep: 0 } }));
+      expect(store.get().trainer.enabled).toBe(true);
+    });
+
+    it('switches off when the speed is changed manually', () => {
+      c.nudgeRate(0.05);
+      expect(store.get().trainer.enabled).toBe(false);
+    });
+
+    it('switches off when the loop is turned off or moved', () => {
+      c.toggleLoop();
+      expect(store.get().trainer.enabled).toBe(false);
+      c.toggleLoop();
+      c.setTrainerEnabled(true);
+      c.shiftLoop(1);
+      expect(store.get().trainer.enabled).toBe(false);
+    });
+
+    it('switches off when seeking outside the loop, but not within it', () => {
+      c.seek(15);
+      expect(store.get().trainer.enabled).toBe(true);
+      c.seek(40);
+      expect(store.get().trainer.enabled).toBe(false);
+    });
+  });
+
   it('toggles a bar-long loop into existence at the playhead', () => {
     at(10);
     store.set({ tempo: { bpm: 120, offset: 0, beatsPerBar: 4, detectedBpm: null } });

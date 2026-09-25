@@ -88,17 +88,7 @@ export function LoopPanel() {
       <div className="subsection">
         <div className="subsection-head">
           <h3>Speed trainer</h3>
-          <Toggle
-            checked={trainer.enabled}
-            onChange={(v) => {
-              setTrainer({ enabled: v, rep: 0 });
-              if (v) {
-                c.setRate(trainer.startRate);
-                if (!store.get().loop.enabled) c.toggleLoop();
-              }
-            }}
-            title="Gradually change speed after each set of loop repetitions"
-          >
+          <Toggle checked={trainer.enabled} onChange={c.setTrainerEnabled} title="Gradually change speed after each set of loop repetitions">
             {trainer.enabled ? `On · ${fmtPct(rate)} · rep ${trainer.rep + 1}/${trainer.repsPerStep}` : 'Off'}
           </Toggle>
         </div>
