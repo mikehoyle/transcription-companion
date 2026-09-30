@@ -69,7 +69,7 @@ export function HelpDialog() {
           </ul>
           <p className="muted">
             Everything happens locally in your browser. Audio files are never uploaded anywhere. Your markers, loops and settings are remembered per file in this browser, and your
-            last file (up to 100 MB) is reopened on your next visit — use <b>Save session</b> to keep them as a file you can move elsewhere.
+            last file (up to 200 MB) is reopened on your next visit — use <b>Save session</b> to keep them as a file you can move elsewhere.
           </p>
         </section>
         <section>
