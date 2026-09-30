@@ -23,7 +23,7 @@ exported on your machine, and nothing is uploaded or persisted. The container on
 | **Markers** | Tap markers while listening, rename, drag, jump with 1–9, loop from a marker to the next. |
 | **Tuner** | A separate page (`/tuner/`, popped out from the tuning fork in the header): reference tones for 27 tunings across guitar, bass, ukulele, violin, viola, cello, double bass, mandolin and banjo. Pluck or drone, three timbres, per-string semitone tweaks, octave shift, hands-free auto-repeat (on by default, and it waits for your first note), any chromatic note, and A4 adjustable from 415 to 466 Hz. One note sounds at a time, so a new pick cuts whatever is still ringing. It plays tones only — no microphone. |
 | **Export** | Render the loop or whole file to WAV with the current speed, pitch, channel and EQ settings. |
-| **Sessions** | Markers, loops, tempo and settings are autosaved per file in the browser (localStorage) and restored when you reopen it; the last opened file (up to 100 MB) is kept in IndexedDB and reopened on your next visit. Sessions can also be saved/loaded as a small JSON file. |
+| **Sessions** | Markers, loops, tempo and settings are autosaved per file in the browser (localStorage) and restored when you reopen it; the last opened file (up to 200 MB) is kept in IndexedDB and reopened on your next visit. Sessions can also be saved/loaded as a small JSON file. |
 | **Keyboard** | Extensive shortcuts — press `?` in the app for the full list. |
 
 ## Running locally

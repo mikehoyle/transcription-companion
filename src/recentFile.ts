@@ -6,7 +6,7 @@ const STORE = 'files';
 const RECENT = 'recent';
 
 /** Files larger than this aren't kept, to avoid doubling disk use for big videos. */
-export const RECENT_FILE_MAX_BYTES = 100 * 1024 * 1024;
+export const RECENT_FILE_MAX_BYTES = 200 * 1024 * 1024;
 
 interface StoredFile {
   name: string;
